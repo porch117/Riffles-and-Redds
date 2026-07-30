@@ -702,6 +702,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .brand .mark{width:42px;height:42px;flex:none}
   .brand .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--brookbelly);margin:0 0 3px}
   .brand h1{font-family:"Bricolage Grotesque";font-weight:800;font-size:22px;line-height:1;margin:0;letter-spacing:-.01em}
+  .brand .credit{font-family:"IBM Plex Mono";font-size:9px;letter-spacing:.1em;color:var(--riffle);opacity:.85;margin:4px 0 0}
   .controls{padding:16px 20px;border-bottom:1px solid var(--line)}
   .row{display:flex;gap:8px}
   .btn{font-family:"Inter";font-weight:600;font-size:13px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--foam);padding:9px 12px;cursor:pointer;transition:background .15s,border-color .15s;display:inline-flex;align-items:center;gap:6px;justify-content:center}
@@ -755,6 +756,23 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .pop .co{font-family:"IBM Plex Mono";font-size:10.5px;color:#6a7a75}
   .flowpop .fb{margin-top:8px;padding:9px 10px;background:#eef3ee;border-left:3px solid var(--moss);border-radius:4px;font-size:12.5px;color:var(--ink);line-height:1.5}
   .flowpop .fb span{display:block;font-family:"IBM Plex Mono";font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--moss);margin-bottom:3px}
+  .flowpop .fb.spin{border-left-color:#3d8aa8}
+  .flowpop .fb.spin span{color:#2f6f86}
+  .flowpop .norm{margin:7px 0}
+  .flowpop .norm .normcls{font-weight:600}
+  .flowpop .avg{margin:8px 0 2px}
+  .flowpop .avgsel{font-family:"Inter";font-size:12px;color:var(--ink);background:#fff;border:1px solid #ccd2d0;border-radius:6px;padding:2px 5px}
+  .spot .coordlink{display:inline-block;margin-top:3px;font-family:"IBM Plex Mono";font-size:10px;color:#8aa;text-decoration:none}
+  .spot .coordlink:hover{color:var(--brookbelly);text-decoration:underline}
+  .flowpop .trend{font-family:"IBM Plex Mono";font-size:10px;margin-left:4px;white-space:nowrap}
+  .flowpop .trend.rising{color:#c0562f}.flowpop .trend.falling{color:#2f6f86}.flowpop .trend.steady{color:#6a7a75}
+  .flowpop .hydro{margin:9px 0 2px;min-height:20px;font-size:11px;color:#6a7a75}
+  .flowpop .spark{display:block}
+  .flowpop .sparklbl{display:flex;justify-content:space-between;font-family:"IBM Plex Mono";font-size:9px;color:#6a7a75;margin-top:-1px}
+  .flowpop .foot{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .flowpop .refresh{background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;color:#2f6f86;font-size:13px;line-height:1;padding:2px 5px}
+  .flowpop .refresh:hover{color:#e8963e;border-color:#e8963e}
+  .flowpop a{color:#2f6f86}
 
   .mapbtn{position:absolute;z-index:900;right:12px;bottom:26px;background:var(--deepwater);color:var(--foam);border:1px solid var(--line);border-radius:10px;width:40px;height:40px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);display:inline-flex;align-items:center;justify-content:center}
   .mapbtn:hover{background:#164049}
@@ -792,7 +810,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <circle cx="96" cy="52" r="3.4" fill="#e8963e" stroke="#f3efe4" stroke-width="1"/><circle cx="120" cy="46" r="3" fill="#e8963e" stroke="#f3efe4" stroke-width="1"/>
     <circle cx="124" cy="62" r="3.2" fill="#e8963e" stroke="#f3efe4" stroke-width="1"/><circle cx="150" cy="54" r="2.8" fill="#e8963e" stroke="#f3efe4" stroke-width="1"/>
   </svg>
-  <p class="eyebrow">Salmonid Field Log</p>
+  <p class="eyebrow">made by naturewithman</p>
   <h1>Riffle&nbsp;&amp;&nbsp;Redd</h1>
   <p class="tag">Map the water, log every catch, and read live river flows — a field notebook for trout &amp; salmon that usually dies in a spreadsheet.</p>
   <div class="caps">
@@ -814,21 +832,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <path d="M96,30 C108,12 130,12 140,30 Z" fill="#2c5f66"/><circle cx="46" cy="52" r="5" fill="#0b2429"/>
         <circle cx="112" cy="50" r="4" fill="#e8963e"/><circle cx="140" cy="58" r="3.6" fill="#e8963e"/>
       </svg>
-      <div><p class="eyebrow">Salmonid Field Log</p><h1>Riffle &amp; Redd</h1></div>
+      <div><h1>Riffle &amp; Redd</h1><p class="credit">made by naturewithman</p></div>
     </div>
     <div class="controls">
+      <p class="datalbl" style="margin-top:0">Stream gage dashboard</p>
       <div class="row">
-        <button class="btn btn-primary" id="addBtn">+ Add spot</button>
+        <button class="btn btn-primary toggle" id="flowBtn" style="flex:1">🌊 Show live gages</button>
+      </div>
+      <div class="datastatus" id="dataStatus"></div>
+      <p class="datalbl">Your log</p>
+      <div class="row">
+        <button class="btn btn-ghost" id="addBtn" style="flex:1.3">+ Add spot</button>
         <button class="btn btn-ghost" id="exportBtn" title="Save a backup file">Export</button>
         <button class="btn btn-ghost" id="importBtn" title="Load a backup file">Import</button>
       </div>
       <input type="file" id="importFile" accept="application/json" hidden />
-      <p class="datalbl">Live data</p>
-      <div class="row">
-        <button class="btn btn-ghost toggle" id="flowBtn">🌊 Streamflow</button>
-        <button class="btn btn-ghost toggle" id="heatBtn">🔥 Catch heat</button>
+      <div class="row" style="margin-top:8px">
+        <button class="btn btn-ghost toggle" id="heatBtn" style="flex:1">🔥 Catch heat map</button>
       </div>
-      <div class="datastatus" id="dataStatus"></div>
     </div>
 
     <div class="form" id="form">
@@ -927,8 +948,13 @@ const topo=L.tileLayer("https://basemap.nationalmap.gov/arcgis/rest/services/USG
 const imagery=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Esri, Maxar, Earthstar Geographics"});
 const naip=L.tileLayer("https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:16,maxZoom:19,attribution:"USGS The National Map · NAIP"});
 const streets=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Esri"});
+const relief=L.tileLayer("https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:16,maxZoom:19,attribution:"USGS 3DEP · LiDAR-derived hillshade"});
+const hybImg=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Esri, Maxar"});
+const roadsRef=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",{maxZoom:19});
+const hybrid=L.layerGroup([hybImg,roadsRef]);
+const bounds=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Esri"});
 topo.addTo(map);
-L.control.layers({"USGS Topo":topo,"Satellite (Esri)":imagery,"US Aerial (NAIP)":naip,"Streets":streets},null,{position:"topright",collapsed:false}).addTo(map);
+L.control.layers({"USGS Topo":topo,"Satellite (Esri)":imagery,"Satellite Hybrid":hybrid,"US Aerial (NAIP)":naip,"LiDAR Hillshade":relief,"Streets":streets},{"State lines & labels":bounds},{position:"topright",collapsed:false}).addTo(map);
 
 /* spot markers + list */
 let markers={};
@@ -942,7 +968,7 @@ function popupHtml(s){
     cinfo=(s.fly?'<p><b>Fly:</b> '+esc(s.fly)+'</p>':"")+(line?'<p class="co">'+esc(line)+'</p>':"");
   }
   return '<div class="pop"><h3>'+esc(s.name)+'</h3><span class="tag">'+esc(s.type||"Spot")+'</span>'+sp+notes+cinfo+
-    '<p class="co">'+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+'</p><button class="del" data-id="'+s.id+'">Delete this spot</button></div>';
+    '<p class="co"><a href="https://www.google.com/maps?q='+s.lat+','+s.lng+'" target="_blank" rel="noopener" style="color:#6a7a75">'+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+' \u2197</a></p><button class="del" data-id="'+s.id+'">Delete this spot</button></div>';
 }
 const listEl=$("list"),countEl=$("count"),fType=$("filterType"),fSpecies=$("filterSpecies"),fSeason=$("filterSeason");
 function visible(){return spots.filter(s=>
@@ -955,10 +981,10 @@ function render(){
   vis.forEach(s=>{markers[s.id]=L.marker([s.lat,s.lng],{icon:makeIcon(s.type)}).addTo(map).bindPopup(popupHtml(s))});
   countEl.textContent=vis.length+" of "+spots.length+" spot"+(spots.length===1?"":"s");
   if(!vis.length){listEl.innerHTML=spots.length?'<div class="empty">No spots match this filter.</div>':'<div class="empty"><b>Your log is empty.</b> Hit <b>+ Add spot</b>, name it, then tap <b>Pick on map</b> and click the water you want to remember. Set the type to <b>Catch</b> to log a fish.</div>';return}
-  listEl.innerHTML=vis.map(s=>'<div class="spot" data-id="'+s.id+'"><div class="glyph">'+glyphFor(s.type)+'</div><div class="body"><p class="name">'+esc(s.name)+'</p><div class="meta">'+esc(s.type||"Spot")+((s.species&&s.species!=="None")?' · <span class="sp">'+esc(s.species)+'</span>':"")+'</div></div></div>').join("");
+  listEl.innerHTML=vis.map(s=>'<div class="spot" data-id="'+s.id+'"><div class="glyph">'+glyphFor(s.type)+'</div><div class="body"><p class="name">'+esc(s.name)+'</p><div class="meta">'+esc(s.type||"Spot")+((s.species&&s.species!=="None")?' · <span class="sp">'+esc(s.species)+'</span>':"")+'</div><a class="coordlink" href="https://www.google.com/maps?q='+s.lat+','+s.lng+'" target="_blank" rel="noopener">'+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+' \u2197</a></div></div>').join("");
   if(heatOn)updateHeat();
 }
-listEl.addEventListener("click",e=>{const el=e.target.closest(".spot");if(!el)return;const s=spots.find(x=>x.id===el.dataset.id);if(!s)return;map.flyTo([s.lat,s.lng],Math.max(map.getZoom(),13),{duration:.6});const m=markers[s.id];if(m)setTimeout(()=>m.openPopup(),350);if(window.innerWidth<=760)panel.classList.remove("show")});
+listEl.addEventListener("click",e=>{if(e.target.closest("a"))return;const el=e.target.closest(".spot");if(!el)return;const s=spots.find(x=>x.id===el.dataset.id);if(!s)return;map.flyTo([s.lat,s.lng],Math.max(map.getZoom(),13),{duration:.6});const m=markers[s.id];if(m)setTimeout(()=>m.openPopup(),350);if(window.innerWidth<=760)panel.classList.remove("show")});
 map.on("popupopen",e=>{const btn=e.popup._contentNode.querySelector(".del");if(!btn)return;btn.addEventListener("click",()=>{spots=spots.filter(x=>x.id!==btn.dataset.id);save();map.closePopup();render()})});
 fType.addEventListener("change",render);fSpecies.addEventListener("change",render);fSeason.addEventListener("change",render);
 
@@ -1035,14 +1061,31 @@ function flyBox(tF){
   }
   return cap(s)+".";
 }
+function spinLures(tF){
+  const m=new Date().getMonth();
+  const season=[11,0,1].includes(m)?"winter":[2,3,4].includes(m)?"spring":[5,6,7].includes(m)?"summer":"fall";
+  if(tF!=null){
+    if(tF<45)return "Cold, sluggish fish — small jigs and blade baits worked slow near the bottom; compact spoons (Kastmaster) on a slow retrieve.";
+    if(tF<55)return "Inline spinners (Panther Martin, Mepps #1-2) and small spoons; jigs through the deeper runs.";
+    if(tF<65)return "Prime — inline spinners and spoons in the riffles, small crankbaits or jerkbaits along the seams.";
+    return "Warm water — fish riffles early and late with spinners and spoons; ease off if it's stressed.";
+  }
+  return {spring:"Inline spinners and spoons; jigs in higher, off-color flows.",summer:"Spinners and small crankbaits at first and last light; downsize in low, clear water.",fall:"Larger spinners and spoons as fish turn aggressive; jerkbaits in slower pools.",winter:"Small jigs and blade baits fished slow and deep."}[season];
+}
 function flowPopup(g){
   const tF=g.tc==null?null:g.tc*9/5+32;
-  let rows='<p><b>Flow:</b> '+(g.cfs==null?"—":num(Math.round(g.cfs))+" cfs")+'</p>';
+  let rows='<p><b>Flow:</b> '+(g.cfs==null?"—":num(Math.round(g.cfs))+" cfs")+' <span id="trend-'+g.no+'" class="trend"></span></p>';
   if(g.gh!=null)rows+='<p><b>Gage height:</b> '+g.gh.toFixed(2)+' ft</p>';
   rows+='<p><b>Water temp:</b> '+(tF==null?"not reported at this gauge":Math.round(tF)+"°F ("+g.tc.toFixed(1)+"°C)")+'</p>';
+  rows+='<p id="norm-'+g.no+'" class="norm">Loading flow vs. normal…</p>';
   return '<div class="pop flowpop"><h3>🌊 '+esc(g.name)+'</h3>'+rows+
+    '<div id="hydro-'+g.no+'" class="hydro">Loading 72-hr trend…</div>'+
+    '<p class="avg"><b>Avg flow:</b> <select class="avgsel" data-no="'+g.no+'"><option value="1d">1 day</option><option value="1w" selected>1 week</option><option value="1m">1 month</option><option value="3m">3 months</option><option value="1y">1 year</option><option value="por">period of record</option></select> <span id="avg-'+g.no+'">loading…</span></p>'+
     '<div class="fb"><span>Fly box · today\'s conditions</span>'+esc(flyBox(tF))+'</div>'+
-    (g.time?'<p class="co">as of '+esc(fmtTime(g.time))+'</p>':"")+'</div>';
+    '<div class="fb spin"><span>Spin box · lures</span>'+esc(spinLures(tF))+'</div>'+
+    '<p class="co foot"><span id="asof-'+g.no+'">'+(g.time?"as of "+esc(fmtTime(g.time)):"")+'</span>'+
+      '<button class="refresh" title="Refresh this gage">⟳</button>'+
+      '<a href="https://waterdata.usgs.gov/monitoring-location/'+g.no+'/" target="_blank" rel="noopener">USGS ↗</a></p></div>';
 }
 function loadGauges(){
   const c=map.getCenter(),d=0.35;
@@ -1061,7 +1104,7 @@ function renderGauges(data){
     const lat=+si.geoLocation.geogLocation.latitude,lng=+si.geoLocation.geogLocation.longitude;
     const pc=t.variable.variableCode[0].value;
     const vv=t.values[0]&&t.values[0].value[0];
-    if(!sites[no])sites[no]={name:si.siteName,lat,lng,cfs:null,gh:null,tc:null,time:null};
+    if(!sites[no])sites[no]={no,name:si.siteName,lat,lng,cfs:null,gh:null,tc:null,time:null};
     if(vv){const val=parseFloat(vv.value);if(!isNaN(val)&&val>-999990){
       if(pc==="00060"){sites[no].cfs=val;sites[no].time=vv.dateTime}
       else if(pc==="00065"){sites[no].gh=val}
@@ -1069,10 +1112,86 @@ function renderGauges(data){
     }}
   }catch(err){}});
   const arr=Object.values(sites);
-  arr.forEach(g=>flowLayer.addLayer(L.marker([g.lat,g.lng],{icon:gaugeIcon(g.cfs)}).bindPopup(flowPopup(g))));
+  arr.forEach(g=>{const mk=L.marker([g.lat,g.lng],{icon:gaugeIcon(g.cfs)}).bindPopup(flowPopup(g),{maxWidth:300});mk.gaugeData=g;flowLayer.addLayer(mk);});
   setStatus(arr.length?arr.length+" gauges in view · tap one for flow, temp & flies":"No active gauges here — pan to a river and it'll refresh.");
 }
 
+/* gage detail: 72-hr hydrograph, trend, refresh */
+let curGauge=null,curPopup=null;
+map.on("popupopen",e=>{const src=e.popup._source;if(src&&src.gaugeData){curGauge=src.gaugeData;curPopup=e.popup;loadGaugeDetail(curGauge);loadStats(curGauge);loadAverages(curGauge);}});
+map.getContainer().addEventListener("change",ev=>{if(ev.target.closest(".avgsel")&&curGauge)updateAvg(curGauge);});
+map.on("popupclose",e=>{if(e.popup===curPopup){curGauge=null;curPopup=null;}});
+map.getContainer().addEventListener("click",ev=>{if(ev.target.closest(".refresh")&&curGauge&&curPopup)refreshGauge(curGauge,curPopup);});
+function sparkline(pts){
+  const W=236,H=52,pad=4,vs=pts.map(p=>p.v),mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rng=(mx-mn)||1,n=pts.length;
+  const x=i=>pad+i*(W-2*pad)/(n-1),y=v=>H-pad-((v-mn)/rng)*(H-2*pad);
+  let d="";pts.forEach((p,i)=>{d+=(i?"L":"M")+x(i).toFixed(1)+" "+y(p.v).toFixed(1)+" ";});
+  const area=d+"L"+x(n-1).toFixed(1)+" "+(H-pad)+" L"+x(0).toFixed(1)+" "+(H-pad)+" Z";
+  return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none"><path d="'+area+'" fill="rgba(47,111,134,.15)"/><path d="'+d+'" fill="none" stroke="#2f6f86" stroke-width="1.6"/></svg><div class="sparklbl"><span>'+num(Math.round(mn))+' cfs</span><span>72-hr flow</span><span>'+num(Math.round(mx))+' cfs</span></div>';
+}
+function loadGaugeDetail(g){
+  const el=document.getElementById("hydro-"+g.no);if(!el)return;
+  fetch("https://waterservices.usgs.gov/nwis/iv/?format=json&sites="+g.no+"&parameterCd=00060&period=P3D")
+    .then(r=>{if(!r.ok)throw 0;return r.json();}).then(d=>{
+      const ts=d&&d.value&&d.value.timeSeries&&d.value.timeSeries[0];
+      const pts=((ts&&ts.values[0]&&ts.values[0].value)||[]).map(v=>({v:parseFloat(v.value)})).filter(p=>!isNaN(p.v)&&p.v>-999990);
+      const el2=document.getElementById("hydro-"+g.no);if(!el2)return;
+      if(pts.length<2){el2.innerHTML='<span class="co">No recent trend at this gage.</span>';return;}
+      el2.innerHTML=sparkline(pts);
+      const first=pts[0].v,last=pts[pts.length-1].v,ch=last-first,pct=first?ch/first*100:0;
+      const thr=Math.max(1,first*0.03),dir=ch>thr?"rising":ch<-thr?"falling":"steady";
+      const tEl=document.getElementById("trend-"+g.no);
+      if(tEl){tEl.textContent=(dir==="rising"?"▲ ":dir==="falling"?"▼ ":"■ ")+dir+(Math.abs(pct)>=1?" "+(pct>0?"+":"")+pct.toFixed(0)+"%/3d":"");tEl.className="trend "+dir;}
+    }).catch(()=>{const el3=document.getElementById("hydro-"+g.no);if(el3)el3.innerHTML='<span class="co">Trend unavailable (works best hosted online).</span>';});
+}
+function pf(x){const n=parseFloat(x);return isNaN(n)?null:n;}
+function parseRDB(t){const lines=t.split("\n").filter(l=>l&&l[0]!=="#");if(lines.length<3)return[];const hdr=lines[0].split("\t");const out=[];for(let i=2;i<lines.length;i++){const c=lines[i].split("\t");if(c.length<hdr.length)continue;const o={};hdr.forEach((hh,k)=>o[hh]=c[k]);out.push(o);}return out;}
+function normClass(q,p){if(p.p10!=null&&q<p.p10)return"much below normal";if(p.p25!=null&&q<p.p25)return"below normal";if(p.p75!=null&&q<=p.p75)return"normal";if(p.p90!=null&&q<=p.p90)return"above normal";return"much above normal";}
+function loadStats(g){
+  const td=new Date(),mo=td.getMonth()+1,dy=td.getDate();
+  fetch("https://waterservices.usgs.gov/nwis/stat/?format=rdb&sites="+g.no+"&statReportType=daily&statTypeCd=all&parameterCd=00060")
+    .then(r=>{if(!r.ok)throw 0;return r.text();}).then(txt=>{
+      const rows=parseRDB(txt);if(!rows.length)throw 0;
+      let sum=0,cnt=0;rows.forEach(r=>{const m=pf(r.mean_va);if(m!=null){sum+=m;cnt++;}});g._por=cnt?sum/cnt:null;
+      const row=rows.find(r=>+r.month_nu===mo&&+r.day_nu===dy)||rows[0];
+      const p={p10:pf(row.p10_va),p25:pf(row.p25_va),p50:pf(row.p50_va),p75:pf(row.p75_va),p90:pf(row.p90_va)};
+      const el=document.getElementById("norm-"+g.no);
+      if(el){
+        if(g.cfs!=null&&p.p50){const pct=Math.round(g.cfs/p.p50*100);el.innerHTML='<b>Vs. normal:</b> '+pct+'% of the '+Math.round(p.p50).toLocaleString()+' cfs median for today — <span class="normcls">'+normClass(g.cfs,p)+'</span>';}
+        else{el.innerHTML='<b>Vs. normal:</b> median today is '+(p.p50?Math.round(p.p50).toLocaleString()+' cfs':"—")+' (need a current reading to compare)';}
+      }
+      updateAvg(g);
+    }).catch(()=>{const el=document.getElementById("norm-"+g.no);if(el)el.innerHTML='<span class="co">Flow-vs-normal unavailable (works best hosted online).</span>';});
+}
+function loadAverages(g){
+  const end=new Date(),start=new Date();start.setFullYear(start.getFullYear()-1);
+  const iso=d=>d.toISOString().slice(0,10);
+  fetch("https://waterservices.usgs.gov/nwis/dv/?format=json&sites="+g.no+"&parameterCd=00060&statCd=00003&startDT="+iso(start)+"&endDT="+iso(end))
+    .then(r=>{if(!r.ok)throw 0;return r.json();}).then(d=>{
+      const ts=d&&d.value&&d.value.timeSeries&&d.value.timeSeries[0];
+      g._dv=((ts&&ts.values[0]&&ts.values[0].value)||[]).map(v=>parseFloat(v.value)).filter(v=>!isNaN(v)&&v>-999990);
+      updateAvg(g);
+    }).catch(()=>{g._dv=null;updateAvg(g);});
+}
+function meanLast(arr,n){if(!arr||!arr.length)return null;const s=arr.slice(Math.max(0,arr.length-n));return s.reduce((a,b)=>a+b,0)/s.length;}
+function updateAvg(g){
+  const sel=document.querySelector('.avgsel[data-no="'+g.no+'"]'),out=document.getElementById("avg-"+g.no);
+  if(!sel||!out)return;const w=sel.value;let v=null;
+  if(w==="por")v=g._por;else{const mp={"1d":1,"1w":7,"1m":30,"3m":90,"1y":365};v=meanLast(g._dv,mp[w]);}
+  out.textContent=(v==null)?"—":Math.round(v).toLocaleString()+" cfs";
+}
+function refreshGauge(g,popup){
+  const a=document.getElementById("asof-"+g.no);if(a)a.textContent="refreshing…";
+  fetch("https://waterservices.usgs.gov/nwis/iv/?format=json&sites="+g.no+"&parameterCd=00060,00065,00010")
+    .then(r=>{if(!r.ok)throw 0;return r.json();}).then(d=>{
+      const ts=(d&&d.value&&d.value.timeSeries)||[];
+      g.cfs=null;g.gh=null;g.tc=null;g.time=null;
+      ts.forEach(t=>{const pc=t.variable.variableCode[0].value,vv=t.values[0]&&t.values[0].value[0];if(vv){const val=parseFloat(vv.value);if(!isNaN(val)&&val>-999990){if(pc==="00060"){g.cfs=val;g.time=vv.dateTime;}else if(pc==="00065")g.gh=val;else if(pc==="00010")g.tc=val;}}});
+      popup.setContent(flowPopup(g));
+      if(popup._source){popup._source.setIcon(gaugeIcon(g.cfs));popup._source.gaugeData=g;}
+      loadGaugeDetail(g);loadStats(g);loadAverages(g);
+    }).catch(()=>{const a2=document.getElementById("asof-"+g.no);if(a2)a2.textContent="refresh failed — try again";});
+}
 /* mobile */
 const panel=$("panel");
 $("menuBtn").addEventListener("click",()=>panel.classList.toggle("show"));
