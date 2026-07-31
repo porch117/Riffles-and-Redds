@@ -852,6 +852,34 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .flowpop .foot{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .flowpop .refresh{background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;color:#2f6f86;font-size:13px;line-height:1;padding:2px 5px}
   .flowpop .refresh:hover{color:#e8963e;border-color:#e8963e}
+  .flowpop .tabbar{display:flex;gap:2px;margin:8px 0 8px;border-bottom:1px solid var(--line)}
+  .flowpop .tabbtn{background:none;border:none;border-bottom:2px solid transparent;color:#6a7a75;font-family:"Inter";font-size:12.5px;font-weight:600;padding:5px 9px;cursor:pointer;margin-bottom:-1px}
+  .flowpop .tabbtn:hover{color:var(--ink)}
+  .flowpop .tabbtn.on{color:#2f6f86;border-bottom-color:#2f6f86}
+  .flowpop .tabpane{display:none}
+  .flowpop .tabpane.on{display:block}
+  .flowpop.cascade .tabpane{display:block;border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+  .flowpop.cascade .tabbar{display:none}
+  .flowpop .paneh{font-family:"IBM Plex Mono";font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#7a8a85;margin:2px 0 4px}
+  .flowpop .tabnav{display:flex;align-items:center;gap:6px;margin:10px 0 2px}
+  .flowpop .tabnav button{background:none;border:1px solid var(--line);border-radius:6px;color:#2f6f86;font-size:14px;cursor:pointer;padding:2px 10px;font-family:"Inter";line-height:1.4}
+  .flowpop .tabnav button:hover{border-color:#2f6f86}
+  .flowpop .tabnav .cascadebtn{flex:1;font-size:12px;font-weight:600}
+  .flowpop.cascade .tabnav .tabprev,.flowpop.cascade .tabnav .tabnext{opacity:.35;pointer-events:none}
+  .flowpop .reghide{background:none;border:1px solid var(--line);border-radius:5px;color:#7a8a85;font-size:10px;cursor:pointer;padding:1px 6px;float:right;font-family:"Inter"}
+  .flowpop .reghide:hover{color:#c0562f;border-color:#c0562f}
+  .spark .axm,.flowpop svg .axm{font-size:8px;fill:#8a9a95;font-family:"IBM Plex Mono"}
+  .instr-ov{position:fixed;inset:0;background:rgba(11,36,41,.6);z-index:6000;display:none;align-items:flex-start;justify-content:center;padding:38px 16px;overflow:auto}
+  .instr-ov.open{display:flex}
+  .instr-card{background:#f3efe4;color:#1a2b2b;border-radius:14px;max-width:520px;width:100%;padding:26px 30px 30px;box-shadow:0 20px 60px rgba(0,0,0,.45);position:relative;font-family:"Inter"}
+  .instr-card h2{font-family:"Bricolage Grotesque";font-size:22px;margin:0 0 16px;color:#10323a}
+  .instr-sec{margin-bottom:15px}
+  .instr-sec h3{font-size:14px;margin:0 0 3px;color:#10323a}
+  .instr-sec p{font-size:13.5px;line-height:1.55;margin:0;color:#33474a}
+  .instr-x{position:absolute;top:12px;right:16px;background:none;border:none;font-size:26px;line-height:1;color:#6a7a75;cursor:pointer}
+  .instr-x:hover{color:#c0562f}
+  .instr-btn{background:var(--deepwater)!important;color:var(--foam)!important;font:600 12px "Inter"!important;padding:0 11px!important;line-height:30px!important;height:30px!important;width:auto!important;text-decoration:none!important;white-space:nowrap}
+  .instr-btn:hover{background:#164049!important}
   .flowpop .regime{margin:9px 0 2px}
   .flowpop .regbtn{background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;color:#5a7a50;font-size:12.5px;padding:5px 9px;font-family:"Inter"}
   .flowpop .regbtn:hover{border-color:#6a8f5f;color:#456a3c}
@@ -1317,29 +1345,33 @@ function spinLures(tF){
   return {spring:"Inline spinners and spoons; jigs in higher, off-color flows.",summer:"Spinners and small crankbaits at first and last light; downsize in low, clear water.",fall:"Larger spinners and spoons as fish turn aggressive; jerkbaits in slower pools.",winter:"Small jigs and blade baits fished slow and deep."}[season];
 }
 function tackleBox(tF,cfs){
-  var size=cfs==null?"#2\u20133":(cfs>800?"#3\u20134 (go bigger \u2014 more water and color)":(cfs>200?"#2\u20133":"#0\u20132 (go smaller \u2014 the water's low and clear)"));
+  var size=cfs==null?"#2\u20133":(cfs>800?"#3\u20134 (go bigger, there's more water and color)":(cfs>200?"#2\u20133":"#0\u20132 (go smaller, the water's low and clear)"));
   var color=(cfs!=null&&cfs>800)?"darker, higher-contrast blades (black-and-gold, brown, firetiger)":"natural silver or gold blades";
-  var act=tF==null?"":(tF>=68?" Water's warm (\u226568\u00B0F) \u2014 fish dawn and dusk and release quickly.":(tF<45?" Cold water \u2014 slow the retrieve and work it deeper.":" Prime temps \u2014 cover water and vary the retrieve."));
-  return "For trout & salmon I'd throw in-line spinners \u2014 Panther Martin, Blue Fox Vibrax, Mepps, or Rooster Tail \u2014 around "+size+", "+color+"."+act;
+  var act=tF==null?"":(tF>=68?" Water's warm (over 68\u00B0F), so fish dawn and dusk and release quickly.":(tF<45?" Cold water, so slow the retrieve and work it deeper.":" Prime temps, so cover water and vary the retrieve."));
+  return "For trout and salmon I'd throw in-line spinners like a Panther Martin, Blue Fox Vibrax, Mepps, or Rooster Tail, around "+size+", "+color+"."+act;
 }
 function flowPopup(g){
-  const tF=g.tc==null?null:g.tc*9/5+32;
-  let rows='<p><b>Flow:</b> '+(g.cfs==null?"—":num(Math.round(g.cfs))+" cfs")+' <span id="trend-'+g.no+'" class="trend"></span></p>';
+  var tF=g.tc==null?null:g.tc*9/5+32;
+  var rows='<p><b>Flow:</b> '+(g.cfs==null?"\u2014":num(Math.round(g.cfs))+" cfs")+' <span id="trend-'+g.no+'" class="trend"></span></p>';
   if(g.gh!=null)rows+='<p><b>Gage height:</b> '+g.gh.toFixed(2)+' ft</p>';
-  rows+='<p><b>Water temperature:</b> '+(tF==null?"Not reported at this gage":Math.round(tF)+"°F ("+g.tc.toFixed(1)+"°C)")+'</p>';
-  rows+='<p id="norm-'+g.no+'" class="norm">Comparing with typical flows…</p>';
-  return '<div class="pop flowpop"><h3>'+esc(g.name)+'</h3>'+
-    '<p class="gageno">USGS gage '+esc(g.no)+'</p>'+rows+
-    '<div id="hydro-'+g.no+'" class="hydro">Loading recent flow…</div>'+
-    '<div id="proj-'+g.no+'" class="proj"></div>'+
-    '<p class="avg"><b>Historical average flow</b> <span class="co">— choose a period:</span><br>'+
-      '<select class="avgsel" data-no="'+g.no+'"><option value="" disabled selected>Choose period…</option><option value="1d">Past 1 day</option><option value="1w">Past 1 week</option><option value="1m">Past 1 month</option><option value="3m">Past 3 months</option><option value="1y">Past 1 year</option><option value="por">Full period of record</option></select> <span id="avg-'+g.no+'">—</span> <span id="por-'+g.no+'" class="co"></span></p>'+
-    '<div class="fb"><span>Fly box · today\'s conditions</span>'+esc(flyBox(tF))+'</div>'+
-    '<div class="fb tackle"><span>Tackle box · naturewithman\'s picks</span>'+esc(tackleBox(tF,g.cfs))+'</div>'+
-    '<div id="regime-'+g.no+'" class="regime"><button class="regbtn">📈 Long-term flow trend</button></div>'+
+  rows+='<p><b>Water temperature:</b> '+(tF==null?"Not reported at this gage":Math.round(tF)+"\u00B0F ("+g.tc.toFixed(1)+"\u00B0C)")+'</p>';
+  rows+='<p id="norm-'+g.no+'" class="norm">Comparing with typical flows\u2026</p>';
+  return '<div class="pop flowpop" data-active="overview" data-cascade="0"><h3>'+esc(g.name)+'</h3>'+
+    '<p class="gageno">USGS Gage '+esc(g.no)+'</p>'+
+    '<div class="tabbar"><button class="tabbtn on" data-tab="overview">Overview</button><button class="tabbtn" data-tab="graphs">Graphs</button><button class="tabbtn" data-tab="tackle">Tackle</button></div>'+
+    '<div class="tabpane on" data-pane="overview">'+rows+'</div>'+
+    '<div class="tabpane" data-pane="graphs"><p class="paneh">72-hour flow</p>'+
+      '<div id="hydro-'+g.no+'" class="hydro">Loading recent flow\u2026</div>'+
+      '<div id="proj-'+g.no+'" class="proj"></div>'+
+      '<p class="avg"><b>Historical average flow.</b> <span class="co">Choose a period:</span><br>'+
+      '<select class="avgsel" data-no="'+g.no+'"><option value="" disabled selected>Choose period\u2026</option><option value="1d">Past 1 day</option><option value="1w">Past 1 week</option><option value="1m">Past 1 month</option><option value="3m">Past 3 months</option><option value="1y">Past 1 year</option><option value="por">Full period of record</option></select> <span id="avg-'+g.no+'">\u2014</span> <span id="por-'+g.no+'" class="co"></span></p>'+
+      '<div id="regime-'+g.no+'" class="regime"><button class="regbtn">📈 Long-term flow trend</button></div></div>'+
+    '<div class="tabpane" data-pane="tackle"><div class="fb"><span>Fly box, today\'s conditions</span>'+esc(flyBox(tF))+'</div>'+
+      '<div class="fb tackle"><span>Tackle box, naturewithman\'s picks</span>'+esc(tackleBox(tF,g.cfs))+'</div></div>'+
+    '<div class="tabnav"><button class="tabprev" title="Previous">\u2039</button><button class="cascadebtn">Cascade all</button><button class="tabnext" title="Next">\u203A</button></div>'+
     '<p class="co foot"><span id="asof-'+g.no+'">'+(g.time?"As of "+esc(fmtTime(g.time)):"")+'</span>'+
-      '<button class="refresh" title="Refresh this gage">⟳ Refresh</button>'+
-      '<a href="https://waterdata.usgs.gov/monitoring-location/'+g.no+'/" target="_blank" rel="noopener">USGS ↗</a></p></div>';
+      '<button class="refresh" title="Refresh this gage">\u27F3 Refresh</button>'+
+      '<a href="https://waterdata.usgs.gov/monitoring-location/'+g.no+'/" target="_blank" rel="noopener">USGS \u2197</a></p></div>';
 }
 function loadGauges(){
   const c=map.getCenter(),d=0.35;
@@ -1378,25 +1410,30 @@ map.on("popupclose",e=>{if(e.popup===curPopup){curGauge=null;curPopup=null;}});
 map.getContainer().addEventListener("click",ev=>{if(ev.target.closest(".refresh")&&curGauge&&curPopup)refreshGauge(curGauge,curPopup);});
 map.getContainer().addEventListener("click",ev=>{if(ev.target.closest(".regbtn")&&curGauge)loadRegime(curGauge);});
 function sparkline(pts){
-  const W=236,H=52,pad=4,vs=pts.map(p=>p.v),mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rng=(mx-mn)||1,n=pts.length;
-  const x=i=>pad+i*(W-2*pad)/(n-1),y=v=>H-pad-((v-mn)/rng)*(H-2*pad);
-  let d="";pts.forEach((p,i)=>{d+=(i?"L":"M")+x(i).toFixed(1)+" "+y(p.v).toFixed(1)+" ";});
-  const area=d+"L"+x(n-1).toFixed(1)+" "+(H-pad)+" L"+x(0).toFixed(1)+" "+(H-pad)+" Z";
-  return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none"><path d="'+area+'" fill="rgba(47,111,134,.15)"/><path d="'+d+'" fill="none" stroke="#2f6f86" stroke-width="1.6"/></svg><div class="sparklbl"><span>'+num(Math.round(mn))+' cfs</span><span>72-hr flow</span><span>'+num(Math.round(mx))+' cfs</span></div>';
+  var W=250,H=96,padL=4,padR=4,padT=8,padB=18,vs=pts.map(function(p){return p.v;}),mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rng=(mx-mn)||1,n=pts.length,mean=vs.reduce(function(a,b){return a+b;},0)/n;
+  var x=function(i){return padL+i*(W-padL-padR)/((n-1)||1);},y=function(v){return H-padB-((v-mn)/rng)*(H-padT-padB);};
+  var d="";pts.forEach(function(p,i){d+=(i?"L":"M")+x(i).toFixed(1)+" "+y(p.v).toFixed(1)+" ";});
+  var area=d+"L"+x(n-1).toFixed(1)+" "+(H-padB)+" L"+x(0).toFixed(1)+" "+(H-padB)+" Z",my=y(mean).toFixed(1);
+  return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'"><path d="'+area+'" fill="rgba(47,111,134,.15)"/><path d="'+d+'" fill="none" stroke="#2f6f86" stroke-width="1.6"/><line x1="'+padL+'" y1="'+my+'" x2="'+(W-padR)+'" y2="'+my+'" stroke="#c0562f" stroke-width="1" stroke-dasharray="4 3"/><text x="'+(W-padR)+'" y="'+(parseFloat(my)-2).toFixed(1)+'" class="axm" text-anchor="end">mean '+num(Math.round(mean))+'</text><text x="'+padL+'" y="'+(padT+4)+'" class="axm">'+num(Math.round(mx))+' cfs</text><text x="'+padL+'" y="'+(H-padB-1)+'" class="axm">'+num(Math.round(mn))+' cfs</text><text x="'+padL+'" y="'+(H-4)+'" class="axm">72 h ago</text><text x="'+(W-padR)+'" y="'+(H-4)+'" class="axm" text-anchor="end">now</text><text x="'+(W/2)+'" y="'+(H-4)+'" class="axm" text-anchor="middle">Flow (cfs)</text></svg>';
 }
-function annualSpark(vs){var W=236,H=42,pad=4,mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rng=(mx-mn)||1,n=vs.length;var x=function(i){return pad+i*(W-2*pad)/((n-1)||1);},y=function(v){return H-pad-((v-mn)/rng)*(H-2*pad);};var d="";vs.forEach(function(v,i){d+=(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)+" ";});return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none"><path d="'+d+'" fill="none" stroke="#6a8f5f" stroke-width="1.5"/></svg>';}
+function annualSpark(vs){
+  var W=250,H=70,padL=4,padR=4,padT=8,padB=16,mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rng=(mx-mn)||1,n=vs.length,mean=vs.reduce(function(a,b){return a+b;},0)/n;
+  var x=function(i){return padL+i*(W-padL-padR)/((n-1)||1);},y=function(v){return H-padB-((v-mn)/rng)*(H-padT-padB);};
+  var d="";vs.forEach(function(v,i){d+=(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)+" ";});var my=y(mean).toFixed(1);
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'"><path d="'+d+'" fill="none" stroke="#6a8f5f" stroke-width="1.5"/><line x1="'+padL+'" y1="'+my+'" x2="'+(W-padR)+'" y2="'+my+'" stroke="#c0562f" stroke-width="1" stroke-dasharray="4 3"/><text x="'+(W-padR)+'" y="'+(parseFloat(my)-2).toFixed(1)+'" class="axm" text-anchor="end">mean '+num(Math.round(mean))+'</text><text x="'+padL+'" y="'+(padT+4)+'" class="axm">'+num(Math.round(mx))+'</text><text x="'+padL+'" y="'+(H-4)+'" class="axm">annual mean flow (cfs)</text></svg>';
+}
 function loadRegime(g){var el=document.getElementById("regime-"+g.no);if(!el)return;el.innerHTML='<span class="co">Loading the full annual record\u2026</span>';
   fetch("https://waterservices.usgs.gov/nwis/stat/?format=rdb&sites="+g.no+"&statReportType=annual&statTypeCd=mean&parameterCd=00060").then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(txt){
     var rows=parseRDB(txt),yrs=[],ms=[];
     rows.forEach(function(r){var y=parseInt(r.year_nu,10),m=pf(r.mean_va);if(y&&m!=null){yrs.push(y);ms.push(m);}});
-    if(yrs.length<12){el.innerHTML='<button class="regbtn">📈 Long-term flow trend</button> <span class="co">\u2014 not enough annual record here.</span>';return;}
+    if(yrs.length<12){el.innerHTML='<button class="regbtn">📈 Long-term flow trend</button> <span class="co">(not enough annual record here)</span>';return;}
     var f=lstsq(yrs,ms),meanAll=ms.reduce(function(a,b){return a+b;},0)/ms.length,perDec=f?(f.slope*10/(meanAll||1)*100):0;
     var k=Math.min(15,Math.floor(yrs.length/2)),recent=ms.slice(ms.length-k),earlier=ms.slice(0,ms.length-k);
     var mR=recent.reduce(function(a,b){return a+b;},0)/recent.length,mE=earlier.reduce(function(a,b){return a+b;},0)/earlier.length;
     var sd=function(a,mu){return Math.sqrt(a.reduce(function(s,x){return s+(x-mu)*(x-mu);},0)/((a.length-1)||1));};
     var sR=sd(recent,mR),sE=sd(earlier,mE),z=(mR-mE)/(Math.sqrt(sR*sR/recent.length+sE*sE/earlier.length)||1),pctChg=Math.round((mR-mE)/(mE||1)*100);
     var sig=Math.abs(z)>=2?"a statistically significant shift (95%+ confidence)":(Math.abs(z)>=1?"a modest shift":"roughly stable");
-    el.innerHTML='<div class="regtitle">Long-term flow trend <span class="co">('+yrs[0]+"\u2013"+yrs[yrs.length-1]+", "+yrs.length+' yr)</span></div><div class="regspark">'+annualSpark(ms)+'</div><div class="regtext">Annual mean flow is trending <b>'+(perDec>=0?"+":"")+perDec.toFixed(0)+'%/decade</b>. The last '+recent.length+" years average <b>"+Math.round(mR).toLocaleString()+' cfs</b> vs '+Math.round(mE).toLocaleString()+" cfs earlier \u2014 "+Math.abs(pctChg)+"% "+(pctChg>=0?"higher":"lower")+", "+sig+'.</div><div class="co" style="margin-top:5px">A shift like this can come from dam changes, land use, or climate \u2014 the record shows the change, not its cause.</div>';
+    el.innerHTML='<div class="regtitle">Long-term flow trend <span class="co">('+yrs[0]+"\u2013"+yrs[yrs.length-1]+", "+yrs.length+' yr)</span><button class="reghide" title="Minimize">Hide</button></div><div class="regspark">'+annualSpark(ms)+'</div><div class="regtext">Annual mean flow is trending <b>'+(perDec>=0?"+":"")+perDec.toFixed(0)+'%/decade</b>. The last '+recent.length+" years average <b>"+Math.round(mR).toLocaleString()+' cfs</b>, versus '+Math.round(mE).toLocaleString()+" cfs earlier. That is "+Math.abs(pctChg)+"% "+(pctChg>=0?"higher":"lower")+", "+sig+'.</div><div class="co" style="margin-top:5px">A shift like this can come from dam changes, land use, or climate. The record shows the change, not its cause.</div>';
   }).catch(function(){el.innerHTML='<span class="co">Long-term record unavailable (works best hosted online).</span>';});}
 function loadGaugeDetail(g){
   const el=document.getElementById("hydro-"+g.no);if(!el)return;
@@ -1448,7 +1485,7 @@ function loadAverages(g){
 function meanLast(arr,n){if(!arr||!arr.length)return null;const s=arr.slice(Math.max(0,arr.length-n));return s.reduce((a,b)=>a+b,0)/s.length;}
 function lstsq(xs,ys){var n=xs.length,sx=0,sy=0,sxx=0,sxy=0,syy=0;for(var i=0;i<n;i++){sx+=xs[i];sy+=ys[i];sxx+=xs[i]*xs[i];sxy+=xs[i]*ys[i];syy+=ys[i]*ys[i];}var d=n*sxx-sx*sx;if(d===0)return null;var m=(n*sxy-sx*sy)/d;var num=n*sxy-sx*sy,den=Math.sqrt((n*sxx-sx*sx)*(n*syy-sy*sy));var r2=den===0?0:Math.pow(num/den,2);return {slope:m,r2:r2};}
 function fitRecession(series){var n=series.length;if(n<5)return null;var recent=series.slice(Math.max(0,n-14));var m=recent.length;var pk=0;for(var i=0;i<m;i++){if(recent[i]>=recent[pk])pk=i;}var lastRise=recent[m-1]>recent[m-2];var tail=recent.slice(pk);if(lastRise&&(m-1-pk)<=1)return {regime:"rising",qNow:recent[m-1]};if(tail.length<4||tail[tail.length-1]>=tail[0])return {regime:"steady",qNow:recent[m-1]};var xs=[],ys=[];for(var j=0;j<tail.length;j++){if(tail[j]>0){xs.push(j);ys.push(Math.log(tail[j]));}}if(xs.length<3)return {regime:"steady",qNow:recent[m-1]};var f=lstsq(xs,ys);if(!f||f.slope>=0)return {regime:"steady",qNow:recent[m-1]};return {regime:"receding",k:f.slope,r2:f.r2,qNow:tail[tail.length-1]};}
-function renderProjection(g){var el=document.getElementById("proj-"+g.no);if(!el)return;if(!g._dv||g._dv.length<6){el.innerHTML="";return;}var r=fitRecession(g._dv);if(!r){el.innerHTML="";return;}if(r.regime==="rising"){el.innerHTML='<span class="ptag rise">Rising</span> flows are climbing — likely rain-driven. Recession projection resumes once it crests.';return;}if(r.regime==="steady"){el.innerHTML='<span class="ptag flat">Steady</span> baseflow is flat — little change expected over the next several days.';return;}var pctDay=Math.round((1-Math.exp(r.k))*100);var q3=Math.round(r.qNow*Math.exp(r.k*3)),q7=Math.round(r.qNow*Math.exp(r.k*7));var d3=new Date(Date.now()+3*864e5),d7=new Date(Date.now()+7*864e5);var fmt=function(dt){return dt.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});};var caveat=r.r2<0.7?' <span class="co">(noisy fit — treat as rough)</span>':'';el.innerHTML='<span class="ptag rec">Receding ~'+pctDay+'%/day</span> baseflow recession — projected ≈ '+q3.toLocaleString()+' cfs by '+fmt(d3)+', ≈ '+q7.toLocaleString()+' cfs by '+fmt(d7)+'.'+caveat;}
+function renderProjection(g){var el=document.getElementById("proj-"+g.no);if(!el)return;if(!g._dv||g._dv.length<6){el.innerHTML="";return;}var r=fitRecession(g._dv);if(!r){el.innerHTML="";return;}if(r.regime==="rising"){el.innerHTML='<span class="ptag rise">Rising</span> flows are climbing, likely rain-driven. Recession projection resumes once it crests.';return;}if(r.regime==="steady"){el.innerHTML='<span class="ptag flat">Steady</span> baseflow is flat, so little change is expected over the next several days.';return;}var pctDay=Math.round((1-Math.exp(r.k))*100);var q3=Math.round(r.qNow*Math.exp(r.k*3)),q7=Math.round(r.qNow*Math.exp(r.k*7));var d3=new Date(Date.now()+3*864e5),d7=new Date(Date.now()+7*864e5);var fmt=function(dt){return dt.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});};var caveat=r.r2<0.7?' <span class="co">(noisy fit, treat as rough)</span>':'';el.innerHTML='<span class="ptag rec">Receding ~'+pctDay+'%/day</span> baseflow recession. Projected around '+q3.toLocaleString()+' cfs by '+fmt(d3)+', and around '+q7.toLocaleString()+' cfs by '+fmt(d7)+'.'+caveat;}
 function updateAvg(g){
   const sel=document.querySelector('.avgsel[data-no="'+g.no+'"]'),out=document.getElementById("avg-"+g.no);
   if(!sel||!out)return;const w=sel.value;let v=null;if(!w){out.textContent="—";return;}
@@ -1600,6 +1637,36 @@ function setMode(m){
   updateModeUI();
 }
 updateModeUI();
+
+/* ===== gage popup tabs ===== */
+function setTab(pop,name){var b=pop.querySelectorAll(".tabbtn"),i;for(i=0;i<b.length;i++)b[i].classList.toggle("on",b[i].getAttribute("data-tab")===name);var pn=pop.querySelectorAll(".tabpane");for(i=0;i<pn.length;i++)pn[i].classList.toggle("on",pn[i].getAttribute("data-pane")===name);pop.setAttribute("data-active",name);if(curPopup&&curPopup.update)setTimeout(function(){try{curPopup.update();}catch(e){}},0);}
+function cycleTab(pop,dir){var names=["overview","graphs","tackle"],cur=pop.getAttribute("data-active")||"overview",i=(names.indexOf(cur)+dir+names.length)%names.length;setTab(pop,names[i]);}
+function toggleCascade(pop){var on=pop.getAttribute("data-cascade")==="1";pop.setAttribute("data-cascade",on?"0":"1");pop.classList.toggle("cascade",!on);if(on)setTab(pop,pop.getAttribute("data-active")||"overview");if(curPopup&&curPopup.update)setTimeout(function(){try{curPopup.update();}catch(e){}},0);}
+map.getContainer().addEventListener("click",function(ev){var pop=ev.target.closest(".flowpop");if(!pop)return;
+  if(ev.target.closest(".tabbtn"))setTab(pop,ev.target.closest(".tabbtn").getAttribute("data-tab"));
+  else if(ev.target.closest(".tabnext"))cycleTab(pop,1);
+  else if(ev.target.closest(".tabprev"))cycleTab(pop,-1);
+  else if(ev.target.closest(".cascadebtn"))toggleCascade(pop);
+  else if(ev.target.closest(".reghide")){var rg=pop.querySelector(".regime");if(rg)rg.innerHTML='<button class="regbtn">📈 Long-term flow trend</button>';}
+});
+
+/* ===== instructions overlay ===== */
+(function(){
+var ov=document.createElement("div");ov.className="instr-ov";
+ov.innerHTML='<div class="instr-card"><button class="instr-x" title="Close">\u00D7</button>'
++'<h2>Riffle &amp; Redd: quick guide</h2>'
++'<div class="instr-sec"><h3>Live stream gages</h3><p>Toggle <b>Gages</b> to load active USGS gages in view. Click any gage for current flow, gage height, water temperature, how today compares with the historical record, a 72-hour hydrograph, and a long-term trend.</p></div>'
++'<div class="instr-sec"><h3>Flow estimate at a point</h3><p>Turn on <b>Estimate</b> and click a river. The tool finds the nearest gage and the point\'s drainage area, estimates the flow, and solves an idealized channel cross-section.</p></div>'
++'<div class="instr-sec"><h3>Spots and folders</h3><p>Use <b>Add</b> to mark water. Drag one spot onto another to group them into a folder. Right-click a spot or folder to edit, rename, or delete it.</p></div>'
++'<div class="instr-sec"><h3>Map layers</h3><p>Open the <b>Basemap</b> and <b>FEMA NFHL</b> dropdowns at the top right to switch imagery and toggle flood layers such as cross-sections and base flood elevations.</p></div>'
++'<div class="instr-sec"><h3>Data and GIS</h3><p>Import or export your spots as GeoJSON or Shapefile, and use <b>Select</b> to box a group of pins for export.</p></div>'
++'<div class="instr-sec"><h3>Modes</h3><p>The toolbar beside the zoom buttons always shows your current mode: Pan, Add, Estimate, or Select.</p></div>'
++'</div>';
+document.body.appendChild(ov);
+ov.addEventListener("click",function(e){if(e.target===ov||e.target.closest(".instr-x"))ov.classList.remove("open");});
+var InstrCtl=L.Control.extend({onAdd:function(){var d=L.DomUtil.create("a","instr-btn leaflet-bar");d.href="#";d.title="Instructions";d.textContent="Guide";L.DomEvent.on(d,"click",function(ev){L.DomEvent.stop(ev);ov.classList.add("open");});L.DomEvent.disableClickPropagation(d);return d;}});
+try{map.addControl(new InstrCtl({position:"topleft"}));}catch(e){}
+})();
 
 /* mobile */
 const panel=$("panel");
