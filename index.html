@@ -741,7 +741,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .grp-body{display:none}
   .grp.open .grp-body{display:block}
   .grp-hdr .gcount{margin-left:auto;opacity:.7}
-  .spot.dragover{background:rgba(232,150,62,.2);outline:1px dashed var(--brookbelly);outline-offset:-2px}
+  .spot.dz-above{box-shadow:inset 0 3px 0 var(--brookbelly)}
+  .spot.dz-below{box-shadow:inset 0 -3px 0 var(--brookbelly)}
+  .spot.dz-group{background:rgba(232,150,62,.22);outline:1px dashed var(--brookbelly);outline-offset:-2px}
+  .grp-hdr.dz-group{background:rgba(232,150,62,.28)}
   .spot.dragging{opacity:.45}
   .ctxmenu{position:fixed;z-index:5000;background:var(--deepwater);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.45);padding:4px;display:none}
   .ctxmenu button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--foam);font-size:13px;padding:7px 12px;cursor:pointer;border-radius:5px}
@@ -752,6 +755,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .fema-ctl.open .fema-body{display:block}
   .fema-ctl label{display:block;padding:2px 0;cursor:pointer}
   .fema-ctl input{margin-right:6px}
+  .fema-ctl .fema-hint{font-size:10px;color:var(--riffle);opacity:.8;padding-top:4px}
+  @media (max-width:760px){
+    .leaflet-top.leaflet-right{max-width:66vw;overflow:auto;max-height:72vh}
+    .leaflet-control-layers-expanded{font-size:11.5px;padding:6px 8px}
+    .fema-ctl{font-size:11.5px}
+    .field.two{flex-wrap:wrap}
+    .field.two>div{min-width:118px}
+    .tbtn{width:40px;height:36px;font-size:16px}
+    .estout{font-size:12px}
+  }
   .listwrap{flex:1;overflow-y:auto;min-height:0}
   .count{font-family:"IBM Plex Mono";font-size:11px;color:var(--riffle);padding:14px 20px 6px;letter-spacing:.05em}
   .spot{padding:12px 20px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:11px;align-items:flex-start;transition:background .12s}
@@ -927,17 +940,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
       <div class="estpanel" id="estPanel">
         <h2>Ungaged flow estimate</h2>
-        <p class="esthint" id="estHint">Turn this on, then click the map — region, nearest gage, and drainage area fill in automatically.</p>
-        <div class="field two"><div><label for="eApin">Point area (mi²)</label><input id="eApin" type="number" placeholder="auto" /></div><div style="flex:.6"><label for="eRegion">Region</label><input id="eRegion" placeholder="auto" maxlength="2" /></div></div>
-        <div class="row" style="margin-bottom:11px"><button class="btn btn-ghost" id="ssAuto" style="flex:1.5">⤓ Re-fetch area (StreamStats)</button><a id="ssLink" class="btn btn-ghost" href="https://streamstats.usgs.gov/ss/" target="_blank" rel="noopener" style="flex:none;padding:9px 13px">↗</a></div>
-        <div class="field two"><div><label for="eQref">Gage flow (cfs)</label><input id="eQref" type="number" placeholder="auto" /></div><div><label for="eAref">Gage area (mi²)</label><input id="eAref" type="number" placeholder="auto" /></div></div>
-        <div class="field"><label for="ePhi">Area exponent φ (≈1.0)</label><input id="ePhi" type="number" value="1.0" step="0.05" /></div>
+        <p class="esthint" id="estHint">Turn this on, then click a river — it fetches the data and estimates automatically.</p>
         <div class="estout" id="estQ">—</div>
-        <p class="datalbl" style="margin-top:10px">Cross-section — Manning's trapezoid</p>
-        <div class="field two"><div><label for="eS">Slope (ft/ft)</label><input id="eS" type="number" value="0.005" step="0.001" /></div><div><label for="eN">Manning n</label><input id="eN" type="number" value="0.035" step="0.005" /></div></div>
-        <div class="field two"><div><label for="eB">Bottom width (ft)</label><input id="eB" type="number" value="20" /></div><div><label for="eZ">Side slope z (H:V)</label><input id="eZ" type="number" value="1.5" step="0.5" /></div></div>
-        <button class="btn btn-primary" id="eCalc" style="width:100%">Estimate flow &amp; section</button>
         <div id="xsout"></div>
+        <p class="datalbl collapse-hdr" id="advHdr" style="margin-top:12px">Advanced — inputs &amp; assumptions <span class="chev">▸</span></p>
+        <div class="collapse-body" id="advBody">
+          <div class="field two"><div><label for="eApin">Point area (mi²)</label><input id="eApin" type="number" placeholder="auto" /></div><div style="flex:.6"><label for="eRegion">Region</label><input id="eRegion" placeholder="auto" maxlength="2" /></div></div>
+          <div class="row" style="margin-bottom:11px"><button class="btn btn-ghost" id="ssAuto" style="flex:1.5">⤓ Re-fetch area (StreamStats)</button><a id="ssLink" class="btn btn-ghost" href="https://streamstats.usgs.gov/ss/" target="_blank" rel="noopener" style="flex:none;padding:9px 13px">↗</a></div>
+          <div class="field two"><div><label for="eQref">Gage flow (cfs)</label><input id="eQref" type="number" placeholder="auto" /></div><div><label for="eAref">Gage area (mi²)</label><input id="eAref" type="number" placeholder="auto" /></div></div>
+          <div class="field"><label for="ePhi">Area exponent φ (≈1.0)</label><input id="ePhi" type="number" value="1.0" step="0.05" /></div>
+          <p class="datalbl" style="margin-top:6px">Cross-section — Manning's trapezoid</p>
+          <div class="field two"><div><label for="eS">Slope (ft/ft)</label><input id="eS" type="number" value="0.005" step="0.001" /></div><div><label for="eN">Manning n</label><input id="eN" type="number" value="0.035" step="0.005" /></div></div>
+          <div class="field two"><div><label for="eB">Bottom width (ft)</label><input id="eB" type="number" value="20" /></div><div><label for="eZ">Side slope z (H:V)</label><input id="eZ" type="number" value="1.5" step="0.5" /></div></div>
+          <button class="btn btn-primary" id="eCalc" style="width:100%">Re-estimate</button>
+        </div>
       </div>
 
       <div class="filters">
@@ -1048,7 +1064,7 @@ const hybrid=L.layerGroup([hybImg,roadsRef]);
 const bounds=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Esri"});
 topo.addTo(map);
 const _ov={"State lines & labels":bounds};
-L.control.layers({"USGS Topo":topo,"Satellite (Esri)":imagery,"Satellite Hybrid":hybrid,"US Aerial (NAIP)":naip,"LiDAR Hillshade":relief,"Streets":streets},_ov,{position:"topright",collapsed:true}).addTo(map);
+L.control.layers({"USGS Topo":topo,"Satellite (Esri)":imagery,"Satellite Hybrid":hybrid,"US Aerial (NAIP)":naip,"LiDAR Hillshade":relief,"Streets":streets},_ov,{position:"topright",collapsed:false}).addTo(map);
 (function(){var femaIds={"Flood zones":28,"Base flood elevations":16,"Cross-sections":14,"Stream centerlines":20};var femaLayer=null,femaSel=[];
 function applyFema(){if(typeof L.esri==="undefined")return;
   if(!femaSel.length){if(femaLayer){map.removeLayer(femaLayer);femaLayer=null;}return;}
@@ -1056,7 +1072,7 @@ function applyFema(){if(typeof L.esri==="undefined")return;
   else if(!map.hasLayer(femaLayer)){femaLayer.addTo(map);}
   try{femaLayer.setLayers(femaSel.slice());}catch(e){}}
 var Ctl=L.Control.extend({onAdd:function(){var d=L.DomUtil.create("div","fema-ctl");var body=Object.keys(femaIds).map(function(k){return '<label><input type="checkbox" data-id="'+femaIds[k]+'"> '+k+'</label>';}).join("");
-  d.innerHTML='<div class="fema-hdr">FEMA NFHL \u25B8</div><div class="fema-body">'+body+'</div>';
+  d.innerHTML='<div class="fema-hdr">FEMA NFHL \u25B8</div><div class="fema-body">'+body+'<div class="fema-hint">Zoom in for detailed linework.</div></div>';
   L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);
   d.querySelector(".fema-hdr").addEventListener("click",function(){d.classList.toggle("open");});
   Array.prototype.forEach.call(d.querySelectorAll("input"),function(cb){cb.addEventListener("change",function(){var id=parseInt(cb.dataset.id,10);var i=femaSel.indexOf(id);if(cb.checked){if(i<0)femaSel.push(id);}else{if(i>=0)femaSel.splice(i,1);}applyFema();});});
@@ -1118,7 +1134,7 @@ iconPicker.addEventListener("click",e=>{const b=e.target.closest(".fishbtn");if(
 buildPicker();
 function openForm(){form.classList.add("open");$("fName").focus();if(window.innerWidth<=760)panel.classList.add("show")}
 function closeForm(){form.classList.remove("open");picking=false;pending=null;map.getContainer().style.cursor="";
-  ["fName","fType","fSpecies","fNotes","fDate","fFly","fTemp","fSize"].forEach(id=>$(id).value="");
+  ["fName","fType","fSpecies","fNotes"].forEach(id=>$(id).value="");
   selectedIcon="";buildPicker();
   coordHint.textContent='No point set — tap "Pick on map," then click the map.';coordHint.classList.remove("armed")}
 $("addBtn").addEventListener("click",openForm);
@@ -1385,9 +1401,9 @@ const estBtn=$("estBtn"),estPanel=$("estPanel");let estMode=false,estMarker=null
 estBtn.addEventListener("click",()=>{estMode=!estMode;estBtn.classList.toggle("on",estMode);estPanel.classList.toggle("open",estMode);
   if(estMode){map.getContainer().style.cursor="crosshair";$("estHint").textContent="Click the map to set your point.";if(window.innerWidth<=760)panel.classList.add("show");}
   else{map.getContainer().style.cursor="";}});
-map.on("click",e=>{if(!estMode)return;estPt=e.latlng;autoRegion();autoGage();
+map.on("click",e=>{if(!estMode)return;estPt=e.latlng;$("eApin").value="";$("eQref").value="";$("eAref").value="";$("estQ").innerHTML="—";$("xsout").innerHTML="";autoRegion();autoGage();scheduleAuto();
   if(estMarker)estMarker.setLatLng(estPt);else estMarker=L.marker(estPt,{icon:L.divIcon({className:"",html:'<div class="estpin">\u25CE</div>',iconSize:[24,24],iconAnchor:[12,12]})}).addTo(map);
-  $("estHint").innerHTML="Point set: "+estPt.lat.toFixed(5)+", "+estPt.lng.toFixed(5)+" — get its drainage area from StreamStats \u2197, then Estimate.";});
+  $("estHint").textContent="Point set — fetching data…";});
 function manningDepth(Q,n,S,b,z){if(!(Q>0&&S>0&&n>0))return 0;const f=y=>{const A=(b+z*y)*y,P=b+2*y*Math.sqrt(1+z*z),R=A/(P||1);return (1.486/n)*A*Math.pow(R,2/3)*Math.sqrt(S)-Q;};let hi=0.02,it=0;while(f(hi)<0&&hi<1e5&&it++<80)hi*=1.8;let lo=0;for(let i=0;i<90;i++){const m=(lo+hi)/2;if(f(m)>0)hi=m;else lo=m;}return (lo+hi)/2;}
 function drawXS(b,z,y){const T=b+2*z*y,bankH=y*1.4+1,topW=b+2*z*bankH,W=264,H=118,pad=16,sc=(W-2*pad)/(topW||1),cx=W/2,base=H-pad;
   const bx0=cx-(b/2)*sc,bx1=cx+(b/2)*sc,tx0=cx-(topW/2)*sc,tx1=cx+(topW/2)*sc;
@@ -1436,26 +1452,35 @@ function renderList(vis){var top=vis.filter(function(s){return !s.folder;});var 
   folders.forEach(function(f){var inF=vis.filter(function(s){return s.folder===f;});var open=!collapsedGroups[f];
     html+='<div class="grp'+(open?" open":"")+'" data-folder="'+esc(f)+'"><div class="grp-hdr" data-folder="'+esc(f)+'"><span class="gchev">\u25B8</span>'+esc(f)+'<span class="gcount">'+inF.length+'</span></div><div class="grp-body">'+inF.map(spotRow).join("")+'</div></div>';});
   return html;}
+function clearDz(){listEl.querySelectorAll(".dz-above,.dz-below,.dz-group").forEach(function(x){x.classList.remove("dz-above","dz-below","dz-group");});}
+function dropZone(el,ev){var r=el.getBoundingClientRect();var y=ev.clientY-r.top;if(y<r.height*0.25)return "above";if(y>r.height*0.75)return "below";return "group";}
 function bindDnD(){
   listEl.querySelectorAll(".spot").forEach(function(el){
     el.addEventListener("dragstart",function(ev){dragId=el.dataset.id;el.classList.add("dragging");if(ev.dataTransfer)ev.dataTransfer.effectAllowed="move";});
-    el.addEventListener("dragend",function(){el.classList.remove("dragging");listEl.querySelectorAll(".dragover").forEach(function(x){x.classList.remove("dragover");});});
-    el.addEventListener("dragover",function(ev){ev.preventDefault();el.classList.add("dragover");});
-    el.addEventListener("dragleave",function(){el.classList.remove("dragover");});
-    el.addEventListener("drop",function(ev){ev.preventDefault();ev.stopPropagation();el.classList.remove("dragover");var tid=el.dataset.id;if(dragId&&dragId!==tid)groupOrReorder(dragId,tid);});
+    el.addEventListener("dragend",function(){el.classList.remove("dragging");clearDz();});
+    el.addEventListener("dragover",function(ev){ev.preventDefault();var z=dropZone(el,ev);el.classList.remove("dz-above","dz-below","dz-group");el.classList.add("dz-"+z);});
+    el.addEventListener("dragleave",function(){el.classList.remove("dz-above","dz-below","dz-group");});
+    el.addEventListener("drop",function(ev){ev.preventDefault();ev.stopPropagation();var z=dropZone(el,ev);clearDz();var tid=el.dataset.id;if(dragId&&dragId!==tid)applyDrop(dragId,tid,z);});
   });
   listEl.querySelectorAll(".grp-hdr").forEach(function(hd){
     hd.addEventListener("click",function(){var f=hd.dataset.folder;collapsedGroups[f]=!collapsedGroups[f];render();});
-    hd.addEventListener("dragover",function(ev){ev.preventDefault();});
-    hd.addEventListener("drop",function(ev){ev.preventDefault();ev.stopPropagation();var f=hd.dataset.folder;var sp=spots.find(function(x){return x.id===dragId;});if(sp){sp.folder=f;save();render();setGis("Moved to "+f+".");}});
+    hd.addEventListener("dragover",function(ev){ev.preventDefault();hd.classList.add("dz-group");});
+    hd.addEventListener("dragleave",function(){hd.classList.remove("dz-group");});
+    hd.addEventListener("drop",function(ev){ev.preventDefault();ev.stopPropagation();hd.classList.remove("dz-group");var f=hd.dataset.folder;var sp=spots.find(function(x){return x.id===dragId;});if(sp){sp.folder=f;save();render();setGis("Added to "+f+".");}});
   });
 }
 listEl.addEventListener("dragover",function(ev){ev.preventDefault();});
 listEl.addEventListener("drop",function(ev){var sp=spots.find(function(x){return x.id===dragId;});if(sp&&sp.folder){sp.folder="";save();render();setGis("Ungrouped.");}});
-function groupOrReorder(aId,bId){var a=spots.find(function(x){return x.id===aId;}),b=spots.find(function(x){return x.id===bId;});if(!a||!b)return;
-  if(b.folder){a.folder=b.folder;}else{var base="Folder",name=base,i=1;while(folders.indexOf(name)>=0){i++;name=base+" "+i;}folders.push(name);saveFolders();a.folder=name;b.folder=name;}
-  var ia=spots.indexOf(a);spots.splice(ia,1);var ib=spots.indexOf(b);spots.splice(ib+1,0,a);
-  save();render();setGis('Grouped into "'+a.folder+'".');}
+function applyDrop(aId,bId,zone){var a=spots.find(function(x){return x.id===aId;}),b=spots.find(function(x){return x.id===bId;});if(!a||!b)return;
+  if(zone==="group"){
+    if(b.folder){a.folder=b.folder;}else{var base="Folder",name=base,i=1;while(folders.indexOf(name)>=0){i++;name=base+" "+i;}folders.push(name);saveFolders();a.folder=name;b.folder=name;}
+    var ia=spots.indexOf(a);spots.splice(ia,1);var ib=spots.indexOf(b);spots.splice(ib+1,0,a);
+    save();render();setGis('Grouped into "'+a.folder+'".');return;
+  }
+  a.folder=b.folder||"";
+  var ja=spots.indexOf(a);spots.splice(ja,1);
+  var jb=spots.indexOf(b);spots.splice(zone==="above"?jb:jb+1,0,a);
+  save();render();setGis(a.folder?'Reordered in "'+a.folder+'".':"Reordered.");}
 var ctx=document.createElement("div");ctx.className="ctxmenu";ctx.innerHTML='<button data-act="newfolder">\uFF0B New empty folder</button><button data-act="collapseall">Collapse all groups</button><button data-act="expandall">Expand all groups</button>';document.body.appendChild(ctx);
 $("addBtn").addEventListener("contextmenu",function(ev){ev.preventDefault();ctx.style.display="block";ctx.style.left=Math.min(ev.clientX,window.innerWidth-200)+"px";ctx.style.top=ev.clientY+"px";});
 document.addEventListener("click",function(){ctx.style.display="none";});
@@ -1464,6 +1489,8 @@ ctx.addEventListener("click",function(ev){var b=ev.target.closest("button");if(!
   else if(act==="collapseall"){folders.forEach(function(f){collapsedGroups[f]=true;});render();}
   else if(act==="expandall"){folders.forEach(function(f){collapsedGroups[f]=false;});render();}});
 $("gisHdr").addEventListener("click",function(){$("gisHdr").classList.toggle("open");$("gisBody").classList.toggle("open");});
+$("advHdr").addEventListener("click",function(){$("advHdr").classList.toggle("open");$("advBody").classList.toggle("open");});
+function scheduleAuto(){var tries=0;setEst("Fetching region, nearest gage & drainage area…");var iv=setInterval(function(){tries++;var ap=parseFloat($("eApin").value),qr=parseFloat($("eQref").value),ar=parseFloat($("eAref").value);if(ap>0&&qr>0&&ar>0){clearInterval(iv);$("eCalc").click();}else if(tries>25){clearInterval(iv);setEst("Couldn’t auto-fetch everything (works best once hosted). Open Advanced to fill in what’s missing, then Re-estimate.");}},600);}
 function autoRegion(){try{fetch("https://geo.fcc.gov/api/census/area?lat="+estPt.lat+"&lon="+estPt.lng+"&format=json").then(function(r){return r.json();}).then(function(d){var st=d&&d.results&&d.results[0]&&d.results[0].state_code;if(st){$("eRegion").value=st;var b=$("ssAuto");if(b)b.click();}}).catch(function(){});}catch(e){}}
 function autoGage(){try{var c=estPt,d=0.25;var w=(c.lng-d).toFixed(4),s=(c.lat-d).toFixed(4),e2=(c.lng+d).toFixed(4),n=(c.lat+d).toFixed(4);
   fetch("https://waterservices.usgs.gov/nwis/iv/?format=json&bBox="+w+","+s+","+e2+","+n+"&parameterCd=00060&siteStatus=active").then(function(r){return r.json();}).then(function(dd){var ts=(dd&&dd.value&&dd.value.timeSeries)||[];var best=null,bd=Infinity;
