@@ -1639,9 +1639,9 @@ function setMode(m){
 updateModeUI();
 
 /* ===== gage popup tabs ===== */
-function setTab(pop,name){var b=pop.querySelectorAll(".tabbtn"),i;for(i=0;i<b.length;i++)b[i].classList.toggle("on",b[i].getAttribute("data-tab")===name);var pn=pop.querySelectorAll(".tabpane");for(i=0;i<pn.length;i++)pn[i].classList.toggle("on",pn[i].getAttribute("data-pane")===name);pop.setAttribute("data-active",name);if(curPopup&&curPopup.update)setTimeout(function(){try{curPopup.update();}catch(e){}},0);}
+function setTab(pop,name){var b=pop.querySelectorAll(".tabbtn"),i;for(i=0;i<b.length;i++)b[i].classList.toggle("on",b[i].getAttribute("data-tab")===name);var pn=pop.querySelectorAll(".tabpane");for(i=0;i<pn.length;i++)pn[i].classList.toggle("on",pn[i].getAttribute("data-pane")===name);pop.setAttribute("data-active",name);}
 function cycleTab(pop,dir){var names=["overview","graphs","tackle"],cur=pop.getAttribute("data-active")||"overview",i=(names.indexOf(cur)+dir+names.length)%names.length;setTab(pop,names[i]);}
-function toggleCascade(pop){var on=pop.getAttribute("data-cascade")==="1";pop.setAttribute("data-cascade",on?"0":"1");pop.classList.toggle("cascade",!on);if(on)setTab(pop,pop.getAttribute("data-active")||"overview");if(curPopup&&curPopup.update)setTimeout(function(){try{curPopup.update();}catch(e){}},0);}
+function toggleCascade(pop){var on=pop.getAttribute("data-cascade")==="1";pop.setAttribute("data-cascade",on?"0":"1");pop.classList.toggle("cascade",!on);if(on)setTab(pop,pop.getAttribute("data-active")||"overview");}
 map.getContainer().addEventListener("click",function(ev){var pop=ev.target.closest(".flowpop");if(!pop)return;
   if(ev.target.closest(".tabbtn"))setTab(pop,ev.target.closest(".tabbtn").getAttribute("data-tab"));
   else if(ev.target.closest(".tabnext"))cycleTab(pop,1);
