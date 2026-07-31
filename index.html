@@ -756,6 +756,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .fema-ctl label{display:block;padding:2px 0;cursor:pointer}
   .fema-ctl input{margin-right:6px}
   .fema-ctl .fema-hint{font-size:10px;color:var(--riffle);opacity:.8;padding-top:4px}
+  .basemap-ctl .base-sep{border:none;border-top:1px solid var(--line);margin:6px 0 4px}
   @media (max-width:760px){
     .leaflet-top.leaflet-right{max-width:66vw;overflow:auto;max-height:72vh}
     .leaflet-control-layers-expanded{font-size:11.5px;padding:6px 8px}
@@ -820,6 +821,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .flowpop .fb span{display:block;font-family:"IBM Plex Mono";font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--moss);margin-bottom:3px}
   .flowpop .fb.spin{border-left-color:#3d8aa8}
   .flowpop .fb.spin span{color:#2f6f86}
+  .flowpop .fb.tackle{border-left-color:#8a6d3b}
+  .flowpop .fb.tackle span{color:#8a6d3b}
+  .flowpop .gageno{font-family:"IBM Plex Mono";font-size:10.5px;color:#7a8a85;letter-spacing:.03em;margin:0 0 7px}
+  .pop p{font-size:13.5px}
+  .flowpop .fb{font-size:13px}
+  .flowpop .norm,.flowpop .avg,.flowpop .proj{font-size:13px}
+  .flowpop .avgsel{margin-top:5px}
+  .spot .name{font-size:14.5px}
+  .spot .meta{font-size:12px}
+  .estout{font-size:13.5px}
   .flowpop .norm{margin:7px 0}
   .flowpop .norm .normcls{font-weight:600}
   .flowpop .avg{margin:8px 0 2px}
@@ -841,10 +852,23 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .flowpop .foot{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .flowpop .refresh{background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;color:#2f6f86;font-size:13px;line-height:1;padding:2px 5px}
   .flowpop .refresh:hover{color:#e8963e;border-color:#e8963e}
+  .flowpop .regime{margin:9px 0 2px}
+  .flowpop .regbtn{background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;color:#5a7a50;font-size:12.5px;padding:5px 9px;font-family:"Inter"}
+  .flowpop .regbtn:hover{border-color:#6a8f5f;color:#456a3c}
+  .flowpop .regtitle{font-weight:600;font-size:12.5px;color:var(--ink);margin-bottom:2px}
+  .flowpop .regspark{margin:3px 0}
+  .flowpop .regtext{font-size:12.5px;color:var(--ink);line-height:1.5}
   .flowpop a{color:#2f6f86}
 
   .mapbtn{position:absolute;z-index:900;right:12px;bottom:26px;background:var(--deepwater);color:var(--foam);border:1px solid var(--line);border-radius:10px;width:40px;height:40px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);display:inline-flex;align-items:center;justify-content:center}
   .mapbtn:hover{background:#164049}
+  .modebar{margin-top:10px;border:none!important}
+  .modebar .modebtn{background:var(--deepwater);color:var(--foam);width:30px;height:30px;display:block;text-align:center;text-decoration:none;border-bottom:1px solid var(--line)}
+  .modebar .modebtn:first-child{border-radius:5px 5px 0 0}
+  .modebar .modebtn:last-child{border-bottom:none;border-radius:0 0 5px 5px}
+  .modebar .modebtn:hover{background:#164049}
+  .modebar .modebtn.on{background:var(--brookbelly);color:#231205}
+  .modebar .modebtn svg{width:16px;height:16px;vertical-align:middle;margin-top:7px}
   .mapbtn svg{width:19px;height:19px;display:block}
   .mapbtn.locating svg{animation:spin 1s linear infinite;transform-origin:center}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -906,8 +930,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="scroll">
       <div class="controls">
         <div class="toolbar">
-          <button class="tbtn toggle" id="flowBtn" title="Show live stream gages">🌊</button>
-          <button class="tbtn toggle" id="estBtn" title="Estimate flow at a point">✎</button>
+          <button class="btn btn-ghost toggle" id="flowBtn" style="flex:1" title="Show live stream gages">🌊 Gages</button>
+          <button class="btn btn-ghost toggle" id="estBtn" style="flex:1" title="Estimate flow at a point">✎ Estimate</button>
         </div>
         <div class="datastatus" id="dataStatus"></div>
 
@@ -963,11 +987,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
         </div>
       </div>
 
-      <div class="filters">
-        <p class="lbl">Filter spots</p>
-        <select id="filterType"><option value="">All types</option><option>Parking</option><option>Access trail</option><option>Riffle</option><option>Pool</option><option>Structure</option></select>
-        <select id="filterSpecies"><option value="">All species</option><option>Brown</option><option>Brook</option><option>Rainbow</option><option>None</option></select>
-      </div>
       <div class="listwrap"><div class="count" id="count"></div><div id="list"></div></div>
     </div>
   </aside>
@@ -1071,7 +1090,22 @@ const hybrid=L.layerGroup([hybImg,roadsRef]);
 const bounds=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Esri"});
 topo.addTo(map);
 const _ov={"State lines & labels":bounds};
-L.control.layers({"USGS Topo":topo,"Satellite (Esri)":imagery,"Satellite Hybrid":hybrid,"US Aerial (NAIP)":naip,"LiDAR Hillshade":relief,"Streets":streets},_ov,{position:"topright",collapsed:false}).addTo(map);
+/* ===== basemap dropdown (matches FEMA NFHL box) ===== */
+(function(){
+var baseLayers=[["USGS Topo",topo],["Satellite (Esri)",imagery],["Satellite Hybrid",hybrid],["US Aerial (NAIP)",naip],["LiDAR Hillshade",relief],["Streets",streets]];
+var curBase=topo;
+var BaseCtl=L.Control.extend({onAdd:function(){
+  var d=L.DomUtil.create("div","fema-ctl basemap-ctl");
+  var radios=baseLayers.map(function(b,i){return '<label><input type="radio" name="basemap" '+(b[1]===curBase?"checked":"")+' data-i="'+i+'"> '+b[0]+'</label>';}).join("");
+  d.innerHTML='<div class="fema-hdr">Basemap \u25B8</div><div class="fema-body">'+radios+'<hr class="base-sep"><label><input type="checkbox" data-ov="1"> State lines &amp; labels</label></div>';
+  L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);
+  d.querySelector(".fema-hdr").addEventListener("click",function(){d.classList.toggle("open");});
+  Array.prototype.forEach.call(d.querySelectorAll('input[name="basemap"]'),function(rb){rb.addEventListener("change",function(){var b=baseLayers[parseInt(rb.dataset.i,10)];if(!b)return;if(map.hasLayer(curBase))map.removeLayer(curBase);curBase=b[1];curBase.addTo(map);if(map.hasLayer(bounds)&&bounds.bringToFront)bounds.bringToFront();});});
+  var ov=d.querySelector('input[data-ov="1"]');ov.addEventListener("change",function(){if(ov.checked)bounds.addTo(map);else if(map.hasLayer(bounds))map.removeLayer(bounds);});
+  return d;}});
+try{map.addControl(new BaseCtl({position:"topright"}));}catch(e){}
+})();
+L.control.scale({imperial:true,metric:true,position:"bottomleft"}).addTo(map);
 (function(){var femaIds={"Flood zones":28,"Base flood elevations":16,"Cross-sections":14,"Stream centerlines":20};var femaLayer=null,femaSel=[];
 function applyFema(){if(typeof L.esri==="undefined")return;
   if(!femaSel.length){if(femaLayer){map.removeLayer(femaLayer);femaLayer=null;}return;}
@@ -1117,10 +1151,8 @@ function popupHtml(s){
   return '<div class="pop"><h3>'+esc(s.name)+'</h3><span class="tag">'+esc(s.type||"Spot")+'</span>'+fishtag+sp+folderTag+notes+
     '<p class="co"><a href="https://www.google.com/maps?q='+s.lat+','+s.lng+'" target="_blank" rel="noopener" style="color:#6a7a75">'+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+' \u2197</a></p><button class="del" data-id="'+s.id+'">Delete this spot</button></div>';
 }
-const listEl=$("list"),countEl=$("count"),fType=$("filterType"),fSpecies=$("filterSpecies");
-function visible(){return spots.filter(s=>
-  (!fType.value||s.type===fType.value)&&
-  (!fSpecies.value||(s.species||"None")===fSpecies.value))}
+const listEl=$("list"),countEl=$("count");
+function visible(){return spots.slice();}
 function render(){
   Object.values(markers).forEach(m=>map.removeLayer(m));markers={};
   const vis=visible();
@@ -1131,10 +1163,10 @@ function render(){
 }
 listEl.addEventListener("click",e=>{if(e.target.closest("a"))return;const el=e.target.closest(".spot");if(!el)return;const s=spots.find(x=>x.id===el.dataset.id);if(!s)return;map.flyTo([s.lat,s.lng],Math.max(map.getZoom(),13),{duration:.6});const m=markers[s.id];if(m)setTimeout(()=>m.openPopup(),350);if(window.innerWidth<=760)panel.classList.remove("show")});
 map.on("popupopen",e=>{const btn=e.popup._contentNode.querySelector(".del");if(!btn)return;btn.addEventListener("click",()=>{spots=spots.filter(x=>x.id!==btn.dataset.id);save();map.closePopup();render()})});
-fType.addEventListener("change",render);fSpecies.addEventListener("change",render);
+
 
 /* add-spot */
-const form=$("form"),coordHint=$("coordHint");let pending=null,picking=false;
+const form=$("form"),coordHint=$("coordHint");let pending=null,picking=false,editingId=null;
 let selectedIcon="";const iconPicker=$("iconPicker");
 function buildPicker(){let html='<button type="button" class="fishbtn'+(selectedIcon===""?" on":"")+'" data-icon="" title="Default (by type)">📍</button>';FISH_ORDER.forEach(k=>{const f=FISH[k];html+='<button type="button" class="fishbtn'+(selectedIcon===k?" on":"")+'" data-icon="'+k+'" title="'+f.name+'">'+fishSVG(Object.assign({k:"p"+k},f),26)+'</button>';});iconPicker.innerHTML=html;}
 iconPicker.addEventListener("click",e=>{const b=e.target.closest(".fishbtn");if(!b)return;selectedIcon=b.dataset.icon;buildPicker();});
@@ -1142,8 +1174,8 @@ buildPicker();
 function openForm(){form.classList.add("open");$("fName").focus();if(window.innerWidth<=760)panel.classList.add("show")}
 function closeForm(){form.classList.remove("open");picking=false;pending=null;map.getContainer().style.cursor="";
   ["fName","fType","fSpecies","fNotes"].forEach(id=>$(id).value="");
-  selectedIcon="";buildPicker();
-  coordHint.textContent='No point set — tap "Pick on map," then click the map.';coordHint.classList.remove("armed")}
+  selectedIcon="";buildPicker();editingId=null;$("saveBtn").textContent="Save spot";
+  coordHint.textContent='No point set — tap "Pick on map," then click the map.';coordHint.classList.remove("armed");updateModeUI();}
 $("addBtn").addEventListener("click",openForm);
 $("cancelBtn").addEventListener("click",closeForm);
 $("pickBtn").addEventListener("click",()=>{picking=true;map.getContainer().style.cursor="crosshair";coordHint.textContent="Now click the map to set the point…";coordHint.classList.add("armed")});
@@ -1153,6 +1185,7 @@ $("saveBtn").addEventListener("click",()=>{
   if(!name){$("fName").focus();coordHint.textContent="Give the spot a name first.";return}
   if(!pending){coordHint.textContent='Set a point: tap "Pick on map," then click the map.';coordHint.classList.add("armed");return}
   const type=$("fType").value.trim()||"Pool";
+  if(editingId){var ex=spots.find(function(x){return x.id===editingId;});if(ex){ex.name=name;ex.type=type;ex.species=$("fSpecies").value.trim()||"None";ex.notes=$("fNotes").value.trim();ex.lat=pending.lat;ex.lng=pending.lng;ex.icon=selectedIcon||"";}save();closeForm();render();setGis("Spot updated.");return;}
   const rec={id:"s"+Date.now()+Math.random().toString(36).slice(2,6),name,type,species:$("fSpecies").value.trim()||"None",notes:$("fNotes").value.trim(),lat:pending.lat,lng:pending.lng,icon:selectedIcon||"",folder:""};
   spots.push(rec);save();closeForm();render()});
 
@@ -1229,7 +1262,7 @@ const boxBtn=$("boxBtn");
 function clearSel(){selection=null;if(selRect){map.removeLayer(selRect);selRect=null;}}
 boxBtn.addEventListener("click",()=>{boxMode=!boxMode;boxBtn.classList.toggle("on",boxMode);
   if(boxMode){map.dragging.disable();map.getContainer().style.cursor="crosshair";setGis("Drag a box over the pins you want to export.");}
-  else{map.dragging.enable();map.getContainer().style.cursor="";clearSel();setGis("");}});
+  else{map.dragging.enable();map.getContainer().style.cursor="";clearSel();setGis("");}updateModeUI();});
 map.on("mousedown",e=>{if(!boxMode)return;boxStart=e.latlng;if(selRect){map.removeLayer(selRect);selRect=null;}});
 map.on("mousemove",e=>{if(!boxMode||!boxStart)return;const b=L.latLngBounds(boxStart,e.latlng);if(selRect)selRect.setBounds(b);else selRect=L.rectangle(b,{color:"#e8963e",weight:1.5,dashArray:"5 4",fillOpacity:.06}).addTo(map);});
 map.on("mouseup",e=>{if(!boxMode||!boxStart)return;const b=L.latLngBounds(boxStart,e.latlng);boxStart=null;selection=spots.filter(s=>b.contains(L.latLng(s.lat,s.lng)));setGis(selection.length+" pins selected — GeoJSON/Shapefile export will use just these. Toggle Select area off to clear.");});
@@ -1255,7 +1288,7 @@ flowBtn.addEventListener("click",()=>{
   if(flowOn){flowLayer.addTo(map);loadGauges();map.on("moveend",scheduleGauges)}
   else{map.off("moveend",scheduleGauges);flowLayer.clearLayers();map.removeLayer(flowLayer);setStatus("")}
 });
-function scheduleGauges(){clearTimeout(flowTimer);flowTimer=setTimeout(loadGauges,700)}
+function scheduleGauges(){if(curPopup)return;clearTimeout(flowTimer);flowTimer=setTimeout(loadGauges,700)}
 function gaugeIcon(cfs){const label=cfs==null?"—":(cfs>=1000?(cfs/1000).toFixed(1)+"k":Math.round(cfs));return L.divIcon({className:"",html:'<div class="gauge">'+label+'<em>cfs</em></div>',iconSize:[48,24],iconAnchor:[24,12],popupAnchor:[0,-12]})}
 function flyBox(tF){
   const m=new Date().getMonth();
@@ -1283,20 +1316,29 @@ function spinLures(tF){
   }
   return {spring:"Inline spinners and spoons; jigs in higher, off-color flows.",summer:"Spinners and small crankbaits at first and last light; downsize in low, clear water.",fall:"Larger spinners and spoons as fish turn aggressive; jerkbaits in slower pools.",winter:"Small jigs and blade baits fished slow and deep."}[season];
 }
+function tackleBox(tF,cfs){
+  var size=cfs==null?"#2\u20133":(cfs>800?"#3\u20134 (go bigger \u2014 more water and color)":(cfs>200?"#2\u20133":"#0\u20132 (go smaller \u2014 the water's low and clear)"));
+  var color=(cfs!=null&&cfs>800)?"darker, higher-contrast blades (black-and-gold, brown, firetiger)":"natural silver or gold blades";
+  var act=tF==null?"":(tF>=68?" Water's warm (\u226568\u00B0F) \u2014 fish dawn and dusk and release quickly.":(tF<45?" Cold water \u2014 slow the retrieve and work it deeper.":" Prime temps \u2014 cover water and vary the retrieve."));
+  return "For trout & salmon I'd throw in-line spinners \u2014 Panther Martin, Blue Fox Vibrax, Mepps, or Rooster Tail \u2014 around "+size+", "+color+"."+act;
+}
 function flowPopup(g){
   const tF=g.tc==null?null:g.tc*9/5+32;
   let rows='<p><b>Flow:</b> '+(g.cfs==null?"—":num(Math.round(g.cfs))+" cfs")+' <span id="trend-'+g.no+'" class="trend"></span></p>';
   if(g.gh!=null)rows+='<p><b>Gage height:</b> '+g.gh.toFixed(2)+' ft</p>';
-  rows+='<p><b>Water temp:</b> '+(tF==null?"not reported at this gauge":Math.round(tF)+"°F ("+g.tc.toFixed(1)+"°C)")+'</p>';
-  rows+='<p id="norm-'+g.no+'" class="norm">Loading flow vs. normal…</p>';
-  return '<div class="pop flowpop"><h3>🌊 '+esc(g.name)+'</h3>'+rows+
-    '<div id="hydro-'+g.no+'" class="hydro">Loading 72-hr trend…</div>'+
+  rows+='<p><b>Water temperature:</b> '+(tF==null?"Not reported at this gage":Math.round(tF)+"°F ("+g.tc.toFixed(1)+"°C)")+'</p>';
+  rows+='<p id="norm-'+g.no+'" class="norm">Comparing with typical flows…</p>';
+  return '<div class="pop flowpop"><h3>'+esc(g.name)+'</h3>'+
+    '<p class="gageno">USGS gage '+esc(g.no)+'</p>'+rows+
+    '<div id="hydro-'+g.no+'" class="hydro">Loading recent flow…</div>'+
     '<div id="proj-'+g.no+'" class="proj"></div>'+
-    '<p class="avg"><b>Avg flow:</b> <select class="avgsel" data-no="'+g.no+'"><option value="1d">1 day</option><option value="1w" selected>1 week</option><option value="1m">1 month</option><option value="3m">3 months</option><option value="1y">1 year</option><option value="por">period of record</option></select> <span id="avg-'+g.no+'">loading…</span></p>'+
+    '<p class="avg"><b>Historical average flow</b> <span class="co">— choose a period:</span><br>'+
+      '<select class="avgsel" data-no="'+g.no+'"><option value="" disabled selected>Choose period…</option><option value="1d">Past 1 day</option><option value="1w">Past 1 week</option><option value="1m">Past 1 month</option><option value="3m">Past 3 months</option><option value="1y">Past 1 year</option><option value="por">Full period of record</option></select> <span id="avg-'+g.no+'">—</span> <span id="por-'+g.no+'" class="co"></span></p>'+
     '<div class="fb"><span>Fly box · today\'s conditions</span>'+esc(flyBox(tF))+'</div>'+
-    '<div class="fb spin"><span>Spin box · lures</span>'+esc(spinLures(tF))+'</div>'+
-    '<p class="co foot"><span id="asof-'+g.no+'">'+(g.time?"as of "+esc(fmtTime(g.time)):"")+'</span>'+
-      '<button class="refresh" title="Refresh this gage">⟳</button>'+
+    '<div class="fb tackle"><span>Tackle box · naturewithman\'s picks</span>'+esc(tackleBox(tF,g.cfs))+'</div>'+
+    '<div id="regime-'+g.no+'" class="regime"><button class="regbtn">📈 Long-term flow trend</button></div>'+
+    '<p class="co foot"><span id="asof-'+g.no+'">'+(g.time?"As of "+esc(fmtTime(g.time)):"")+'</span>'+
+      '<button class="refresh" title="Refresh this gage">⟳ Refresh</button>'+
       '<a href="https://waterdata.usgs.gov/monitoring-location/'+g.no+'/" target="_blank" rel="noopener">USGS ↗</a></p></div>';
 }
 function loadGauges(){
@@ -1324,7 +1366,7 @@ function renderGauges(data){
     }}
   }catch(err){}});
   const arr=Object.values(sites);
-  arr.forEach(g=>{const mk=L.marker([g.lat,g.lng],{icon:gaugeIcon(g.cfs)}).bindPopup(flowPopup(g),{maxWidth:300});mk.gaugeData=g;flowLayer.addLayer(mk);});
+  arr.forEach(g=>{const mk=L.marker([g.lat,g.lng],{icon:gaugeIcon(g.cfs)}).bindPopup(flowPopup(g),{maxWidth:330,minWidth:270,autoPan:true,keepInView:true,autoPanPadding:[36,36],closeButton:true});mk.gaugeData=g;flowLayer.addLayer(mk);});
   setStatus(arr.length?arr.length+" gauges in view · tap one for flow, temp & flies":"No active gauges here — pan to a river and it'll refresh.");
 }
 
@@ -1334,6 +1376,7 @@ map.on("popupopen",e=>{const src=e.popup._source;if(src&&src.gaugeData){curGauge
 map.getContainer().addEventListener("change",ev=>{if(ev.target.closest(".avgsel")&&curGauge)updateAvg(curGauge);});
 map.on("popupclose",e=>{if(e.popup===curPopup){curGauge=null;curPopup=null;}});
 map.getContainer().addEventListener("click",ev=>{if(ev.target.closest(".refresh")&&curGauge&&curPopup)refreshGauge(curGauge,curPopup);});
+map.getContainer().addEventListener("click",ev=>{if(ev.target.closest(".regbtn")&&curGauge)loadRegime(curGauge);});
 function sparkline(pts){
   const W=236,H=52,pad=4,vs=pts.map(p=>p.v),mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rng=(mx-mn)||1,n=pts.length;
   const x=i=>pad+i*(W-2*pad)/(n-1),y=v=>H-pad-((v-mn)/rng)*(H-2*pad);
@@ -1341,6 +1384,20 @@ function sparkline(pts){
   const area=d+"L"+x(n-1).toFixed(1)+" "+(H-pad)+" L"+x(0).toFixed(1)+" "+(H-pad)+" Z";
   return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none"><path d="'+area+'" fill="rgba(47,111,134,.15)"/><path d="'+d+'" fill="none" stroke="#2f6f86" stroke-width="1.6"/></svg><div class="sparklbl"><span>'+num(Math.round(mn))+' cfs</span><span>72-hr flow</span><span>'+num(Math.round(mx))+' cfs</span></div>';
 }
+function annualSpark(vs){var W=236,H=42,pad=4,mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rng=(mx-mn)||1,n=vs.length;var x=function(i){return pad+i*(W-2*pad)/((n-1)||1);},y=function(v){return H-pad-((v-mn)/rng)*(H-2*pad);};var d="";vs.forEach(function(v,i){d+=(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)+" ";});return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none"><path d="'+d+'" fill="none" stroke="#6a8f5f" stroke-width="1.5"/></svg>';}
+function loadRegime(g){var el=document.getElementById("regime-"+g.no);if(!el)return;el.innerHTML='<span class="co">Loading the full annual record\u2026</span>';
+  fetch("https://waterservices.usgs.gov/nwis/stat/?format=rdb&sites="+g.no+"&statReportType=annual&statTypeCd=mean&parameterCd=00060").then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(txt){
+    var rows=parseRDB(txt),yrs=[],ms=[];
+    rows.forEach(function(r){var y=parseInt(r.year_nu,10),m=pf(r.mean_va);if(y&&m!=null){yrs.push(y);ms.push(m);}});
+    if(yrs.length<12){el.innerHTML='<button class="regbtn">📈 Long-term flow trend</button> <span class="co">\u2014 not enough annual record here.</span>';return;}
+    var f=lstsq(yrs,ms),meanAll=ms.reduce(function(a,b){return a+b;},0)/ms.length,perDec=f?(f.slope*10/(meanAll||1)*100):0;
+    var k=Math.min(15,Math.floor(yrs.length/2)),recent=ms.slice(ms.length-k),earlier=ms.slice(0,ms.length-k);
+    var mR=recent.reduce(function(a,b){return a+b;},0)/recent.length,mE=earlier.reduce(function(a,b){return a+b;},0)/earlier.length;
+    var sd=function(a,mu){return Math.sqrt(a.reduce(function(s,x){return s+(x-mu)*(x-mu);},0)/((a.length-1)||1));};
+    var sR=sd(recent,mR),sE=sd(earlier,mE),z=(mR-mE)/(Math.sqrt(sR*sR/recent.length+sE*sE/earlier.length)||1),pctChg=Math.round((mR-mE)/(mE||1)*100);
+    var sig=Math.abs(z)>=2?"a statistically significant shift (95%+ confidence)":(Math.abs(z)>=1?"a modest shift":"roughly stable");
+    el.innerHTML='<div class="regtitle">Long-term flow trend <span class="co">('+yrs[0]+"\u2013"+yrs[yrs.length-1]+", "+yrs.length+' yr)</span></div><div class="regspark">'+annualSpark(ms)+'</div><div class="regtext">Annual mean flow is trending <b>'+(perDec>=0?"+":"")+perDec.toFixed(0)+'%/decade</b>. The last '+recent.length+" years average <b>"+Math.round(mR).toLocaleString()+' cfs</b> vs '+Math.round(mE).toLocaleString()+" cfs earlier \u2014 "+Math.abs(pctChg)+"% "+(pctChg>=0?"higher":"lower")+", "+sig+'.</div><div class="co" style="margin-top:5px">A shift like this can come from dam changes, land use, or climate \u2014 the record shows the change, not its cause.</div>';
+  }).catch(function(){el.innerHTML='<span class="co">Long-term record unavailable (works best hosted online).</span>';});}
 function loadGaugeDetail(g){
   const el=document.getElementById("hydro-"+g.no);if(!el)return;
   fetch("https://waterservices.usgs.gov/nwis/iv/?format=json&sites="+g.no+"&parameterCd=00060&period=P3D")
@@ -1359,18 +1416,21 @@ function loadGaugeDetail(g){
 function pf(x){const n=parseFloat(x);return isNaN(n)?null:n;}
 function parseRDB(t){const lines=t.split("\n").filter(l=>l&&l[0]!=="#");if(lines.length<3)return[];const hdr=lines[0].split("\t");const out=[];for(let i=2;i<lines.length;i++){const c=lines[i].split("\t");if(c.length<hdr.length)continue;const o={};hdr.forEach((hh,k)=>o[hh]=c[k]);out.push(o);}return out;}
 function normClass(q,p){if(p.p10!=null&&q<p.p10)return"much below normal";if(p.p25!=null&&q<p.p25)return"below normal";if(p.p75!=null&&q<=p.p75)return"normal";if(p.p90!=null&&q<=p.p90)return"above normal";return"much above normal";}
+function pctileOf(cfs,p){var pts=[[10,p.p10],[25,p.p25],[50,p.p50],[75,p.p75],[90,p.p90]].filter(function(a){return a[1]!=null&&!isNaN(a[1]);});if(pts.length<2)return null;if(cfs<=pts[0][1])return pts[0][0];if(cfs>=pts[pts.length-1][1])return pts[pts.length-1][0];for(var i=0;i<pts.length-1;i++){if(cfs>=pts[i][1]&&cfs<=pts[i+1][1]){var d=(pts[i+1][1]-pts[i][1])||1;return pts[i][0]+((cfs-pts[i][1])/d)*(pts[i+1][0]-pts[i][0]);}}return null;}
+function ordinal(n){var s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
 function loadStats(g){
   const td=new Date(),mo=td.getMonth()+1,dy=td.getDate();
   fetch("https://waterservices.usgs.gov/nwis/stat/?format=rdb&sites="+g.no+"&statReportType=daily&statTypeCd=all&parameterCd=00060")
     .then(r=>{if(!r.ok)throw 0;return r.text();}).then(txt=>{
       const rows=parseRDB(txt);if(!rows.length)throw 0;
-      let sum=0,cnt=0;rows.forEach(r=>{const m=pf(r.mean_va);if(m!=null){sum+=m;cnt++;}});g._por=cnt?sum/cnt:null;
+      let sum=0,cnt=0,by=9999,ey=0;rows.forEach(r=>{const m=pf(r.mean_va);if(m!=null){sum+=m;cnt++;}var b=parseInt(r.begin_yr,10),e=parseInt(r.end_yr,10);if(b&&b<by)by=b;if(e&&e>ey)ey=e;});g._por=cnt?sum/cnt:null;g._recYrs=(ey>by&&by<9999)?(by+"–"+ey):"";
+      var pe=document.getElementById("por-"+g.no);if(pe&&g._recYrs)pe.textContent="(records "+g._recYrs+")";
       const row=rows.find(r=>+r.month_nu===mo&&+r.day_nu===dy)||rows[0];
       const p={p10:pf(row.p10_va),p25:pf(row.p25_va),p50:pf(row.p50_va),p75:pf(row.p75_va),p90:pf(row.p90_va)};
       const el=document.getElementById("norm-"+g.no);
       if(el){
-        if(g.cfs!=null&&p.p50){const pct=Math.round(g.cfs/p.p50*100);el.innerHTML='<b>Vs. normal:</b> '+pct+'% of the '+Math.round(p.p50).toLocaleString()+' cfs median for today — <span class="normcls">'+normClass(g.cfs,p)+'</span>';}
-        else{el.innerHTML='<b>Vs. normal:</b> median today is '+(p.p50?Math.round(p.p50).toLocaleString()+' cfs':"—")+' (need a current reading to compare)';}
+        if(g.cfs!=null&&p.p50){var pk=pctileOf(g.cfs,p);if(pk!=null){var pp=Math.round(pk);el.innerHTML='<b>vs. typical:</b> today\u2019s flow is around the <b>'+ordinal(pp)+' percentile</b> for this date \u2014 higher than about '+pp+'% of days on record. <span class="normcls">'+normClass(g.cfs,p)+' for the season</span> <span class="co">(median '+Math.round(p.p50).toLocaleString()+' cfs)</span>';}else{var pct=Math.round(g.cfs/p.p50*100);el.innerHTML='<b>vs. typical:</b> today\u2019s flow is '+pct+'% of the median for this date ('+Math.round(p.p50).toLocaleString()+' cfs) \u2014 <span class="normcls">'+normClass(g.cfs,p)+' for the season</span>';}}
+        else{el.innerHTML='<b>vs. typical:</b> the median for this date is '+(p.p50?Math.round(p.p50).toLocaleString()+' cfs':"—")+' (no live reading to compare)';}
       }
       updateAvg(g);
     }).catch(()=>{const el=document.getElementById("norm-"+g.no);if(el)el.innerHTML='<span class="co">Flow-vs-normal unavailable (works best hosted online).</span>';});
@@ -1391,7 +1451,7 @@ function fitRecession(series){var n=series.length;if(n<5)return null;var recent=
 function renderProjection(g){var el=document.getElementById("proj-"+g.no);if(!el)return;if(!g._dv||g._dv.length<6){el.innerHTML="";return;}var r=fitRecession(g._dv);if(!r){el.innerHTML="";return;}if(r.regime==="rising"){el.innerHTML='<span class="ptag rise">Rising</span> flows are climbing — likely rain-driven. Recession projection resumes once it crests.';return;}if(r.regime==="steady"){el.innerHTML='<span class="ptag flat">Steady</span> baseflow is flat — little change expected over the next several days.';return;}var pctDay=Math.round((1-Math.exp(r.k))*100);var q3=Math.round(r.qNow*Math.exp(r.k*3)),q7=Math.round(r.qNow*Math.exp(r.k*7));var d3=new Date(Date.now()+3*864e5),d7=new Date(Date.now()+7*864e5);var fmt=function(dt){return dt.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});};var caveat=r.r2<0.7?' <span class="co">(noisy fit — treat as rough)</span>':'';el.innerHTML='<span class="ptag rec">Receding ~'+pctDay+'%/day</span> baseflow recession — projected ≈ '+q3.toLocaleString()+' cfs by '+fmt(d3)+', ≈ '+q7.toLocaleString()+' cfs by '+fmt(d7)+'.'+caveat;}
 function updateAvg(g){
   const sel=document.querySelector('.avgsel[data-no="'+g.no+'"]'),out=document.getElementById("avg-"+g.no);
-  if(!sel||!out)return;const w=sel.value;let v=null;
+  if(!sel||!out)return;const w=sel.value;let v=null;if(!w){out.textContent="—";return;}
   if(w==="por")v=g._por;else{const mp={"1d":1,"1w":7,"1m":30,"3m":90,"1y":365};v=meanLast(g._dv,mp[w]);}
   out.textContent=(v==null)?"—":Math.round(v).toLocaleString()+" cfs";
 }
@@ -1411,7 +1471,7 @@ function refreshGauge(g,popup){
 const estBtn=$("estBtn"),estPanel=$("estPanel");let estMode=false,estMarker=null,estPt=null;
 estBtn.addEventListener("click",()=>{estMode=!estMode;estBtn.classList.toggle("on",estMode);estPanel.classList.toggle("open",estMode);
   if(estMode){map.getContainer().style.cursor="crosshair";$("estHint").textContent="Click the map to set your point.";if(window.innerWidth<=760)panel.classList.add("show");}
-  else{map.getContainer().style.cursor="";}});
+  else{map.getContainer().style.cursor="";}updateModeUI();});
 map.on("click",e=>{if(!estMode)return;estPt=e.latlng;$("eApin").value="";$("eQref").value="";$("eAref").value="";$("estQ").innerHTML="—";$("xsout").innerHTML="";autoRegion();autoGage();scheduleAuto();
   if(estMarker)estMarker.setLatLng(estPt);else estMarker=L.marker(estPt,{icon:L.divIcon({className:"",html:'<div class="estpin">\u25CE</div>',iconSize:[24,24],iconAnchor:[12,12]})}).addTo(map);
   $("estHint").textContent="Point set — fetching data…";});
@@ -1472,12 +1532,14 @@ function bindDnD(){
     el.addEventListener("dragover",function(ev){ev.preventDefault();var z=dropZone(el,ev);el.classList.remove("dz-above","dz-below","dz-group");el.classList.add("dz-"+z);});
     el.addEventListener("dragleave",function(){el.classList.remove("dz-above","dz-below","dz-group");});
     el.addEventListener("drop",function(ev){ev.preventDefault();ev.stopPropagation();var z=dropZone(el,ev);clearDz();var tid=el.dataset.id;if(dragId&&dragId!==tid)applyDrop(dragId,tid,z);});
+    el.addEventListener("contextmenu",function(ev){ev.preventDefault();var s=spots.find(function(x){return x.id===el.dataset.id;});if(!s)return;var items=[{label:"Edit spot",action:function(){editSpot(s.id);}}];if(s.folder)items.push({label:"Remove from folder",action:function(){s.folder="";save();render();setGis("Removed from folder.");}});items.push({label:"Delete spot",action:function(){if(confirm("Delete \""+s.name+"\"?")){spots=spots.filter(function(x){return x.id!==s.id;});save();render();setGis("Spot deleted.");}}});showCtx(ev.clientX,ev.clientY,items);});
   });
   listEl.querySelectorAll(".grp-hdr").forEach(function(hd){
     hd.addEventListener("click",function(){var f=hd.dataset.folder;collapsedGroups[f]=!collapsedGroups[f];render();});
     hd.addEventListener("dragover",function(ev){ev.preventDefault();hd.classList.add("dz-group");});
     hd.addEventListener("dragleave",function(){hd.classList.remove("dz-group");});
     hd.addEventListener("drop",function(ev){ev.preventDefault();ev.stopPropagation();hd.classList.remove("dz-group");var f=hd.dataset.folder;var sp=spots.find(function(x){return x.id===dragId;});if(sp){sp.folder=f;save();render();setGis("Added to "+f+".");}});
+    hd.addEventListener("contextmenu",function(ev){ev.preventDefault();var f=hd.dataset.folder;showCtx(ev.clientX,ev.clientY,[{label:"Rename folder",action:function(){renameFolder(f);}},{label:(collapsedGroups[f]?"Expand":"Collapse")+" folder",action:function(){collapsedGroups[f]=!collapsedGroups[f];render();}},{label:"Ungroup (delete folder)",action:function(){deleteFolder(f);}}]);});
   });
 }
 listEl.addEventListener("dragover",function(ev){ev.preventDefault();});
@@ -1492,13 +1554,15 @@ function applyDrop(aId,bId,zone){var a=spots.find(function(x){return x.id===aId;
   var ja=spots.indexOf(a);spots.splice(ja,1);
   var jb=spots.indexOf(b);spots.splice(zone==="above"?jb:jb+1,0,a);
   save();render();setGis(a.folder?'Reordered in "'+a.folder+'".':"Reordered.");}
-var ctx=document.createElement("div");ctx.className="ctxmenu";ctx.innerHTML='<button data-act="newfolder">\uFF0B New empty folder</button><button data-act="collapseall">Collapse all groups</button><button data-act="expandall">Expand all groups</button>';document.body.appendChild(ctx);
-$("addBtn").addEventListener("contextmenu",function(ev){ev.preventDefault();ctx.style.display="block";ctx.style.left=Math.min(ev.clientX,window.innerWidth-200)+"px";ctx.style.top=ev.clientY+"px";});
+var ctx=document.createElement("div");ctx.className="ctxmenu";document.body.appendChild(ctx);var ctxItems=[];
+function showCtx(x,y,items){ctxItems=items;ctx.innerHTML=items.map(function(it,i){return '<button data-i="'+i+'">'+it.label+'</button>';}).join("");ctx.style.display="block";ctx.style.left=Math.min(x,window.innerWidth-210)+"px";ctx.style.top=Math.min(y,window.innerHeight-12-items.length*34)+"px";}
 document.addEventListener("click",function(){ctx.style.display="none";});
-ctx.addEventListener("click",function(ev){var b=ev.target.closest("button");if(!b)return;var act=b.dataset.act;
-  if(act==="newfolder"){var nm=(prompt("Folder name:")||"").trim();if(nm&&folders.indexOf(nm)<0){folders.push(nm);saveFolders();render();setGis('Folder "'+nm+'" created.');}}
-  else if(act==="collapseall"){folders.forEach(function(f){collapsedGroups[f]=true;});render();}
-  else if(act==="expandall"){folders.forEach(function(f){collapsedGroups[f]=false;});render();}});
+ctx.addEventListener("click",function(ev){var b=ev.target.closest("button");if(!b)return;var it=ctxItems[+b.dataset.i];ctx.style.display="none";if(it&&it.action)it.action();});
+function newFolder(){var nm=(prompt("Folder name:")||"").trim();if(nm&&folders.indexOf(nm)<0){folders.push(nm);saveFolders();render();setGis('Folder "'+nm+'" created.');}}
+function renameFolder(f){var nm=(prompt("Rename folder:",f)||"").trim();if(!nm||nm===f)return;if(folders.indexOf(nm)>=0){setGis("A folder with that name already exists.");return;}var i=folders.indexOf(f);if(i>=0)folders[i]=nm;spots.forEach(function(s){if(s.folder===f)s.folder=nm;});if(collapsedGroups[f]!=null){collapsedGroups[nm]=collapsedGroups[f];delete collapsedGroups[f];}saveFolders();save();render();setGis("Folder renamed.");}
+function deleteFolder(f){spots.forEach(function(s){if(s.folder===f)s.folder="";});var i=folders.indexOf(f);if(i>=0)folders.splice(i,1);saveFolders();save();render();setGis('Folder "'+f+'" removed.');}
+function editSpot(id){var s=spots.find(function(x){return x.id===id;});if(!s)return;editingId=id;openForm();$("fName").value=s.name||"";$("fType").value=s.type||"";$("fSpecies").value=(s.species&&s.species!=="None")?s.species:"";$("fNotes").value=s.notes||"";selectedIcon=s.icon||"";buildPicker();pending={lat:s.lat,lng:s.lng};coordHint.textContent="Editing — location kept ("+s.lat.toFixed(5)+", "+s.lng.toFixed(5)+"). Use Pick on map to move it.";coordHint.classList.add("armed");$("saveBtn").textContent="Update spot";}
+$("addBtn").addEventListener("contextmenu",function(ev){ev.preventDefault();showCtx(ev.clientX,ev.clientY,[{label:"+ New empty folder",action:newFolder},{label:"Collapse all groups",action:function(){folders.forEach(function(f){collapsedGroups[f]=true;});render();}},{label:"Expand all groups",action:function(){folders.forEach(function(f){collapsedGroups[f]=false;});render();}}]);});
 $("gisHdr").addEventListener("click",function(){$("gisHdr").classList.toggle("open");$("gisBody").classList.toggle("open");});
 $("advHdr").addEventListener("click",function(){$("advHdr").classList.toggle("open");$("advBody").classList.toggle("open");});
 function scheduleAuto(){var tries=0;setEst("Fetching region, nearest gage & drainage area…");var iv=setInterval(function(){tries++;var ap=parseFloat($("eApin").value),qr=parseFloat($("eQref").value),ar=parseFloat($("eAref").value);if(ap>0&&qr>0&&ar>0){clearInterval(iv);$("eCalc").click();}else if(tries>25){clearInterval(iv);setEst("Couldn’t auto-fetch everything (works best once hosted). Open Advanced to fill in what’s missing, then Re-estimate.");}},600);}
@@ -1508,6 +1572,34 @@ function autoGage(){try{var c=estPt,d=0.25;var w=(c.lng-d).toFixed(4),s=(c.lat-d
     ts.forEach(function(t){try{var si=t.sourceInfo,no=si.siteCode[0].value,la=+si.geoLocation.geogLocation.latitude,lo=+si.geoLocation.geogLocation.longitude;var vv=t.values[0]&&t.values[0].value[0];var q=vv?parseFloat(vv.value):NaN;if(isNaN(q)||q<=-999990)return;var dist=(la-c.lat)*(la-c.lat)+(lo-c.lng)*(lo-c.lng);if(dist<bd){bd=dist;best={no:no,q:q};}}catch(e3){}});
     if(best){$("eQref").value=Math.round(best.q);fetch("https://waterservices.usgs.gov/nwis/site/?format=rdb&sites="+best.no+"&siteOutput=expanded").then(function(r){return r.text();}).then(function(txt){var rows=parseRDB(txt);if(rows[0]&&rows[0].drain_area_va&&!isNaN(parseFloat(rows[0].drain_area_va)))$("eAref").value=parseFloat(rows[0].drain_area_va);}).catch(function(){});}
   }).catch(function(){});}catch(e){}}
+
+/* ===== mode toolbar: Pan / Add / Estimate / Select ===== */
+var modeDefs=[
+  {k:"pan",label:"Pan & select (default)",icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2l7 18 2.6-7.4L21 10z"/></svg>'},
+  {k:"add",label:"Add a spot — click the map to place it",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>'},
+  {k:"estimate",label:"Estimate flow at a point",icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>'},
+  {k:"select",label:"Box-select pins",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2"><rect x="4" y="4" width="16" height="16" rx="1.5"/></svg>'}
+];
+var modeBtns={};
+var ModeToolbar=L.Control.extend({onAdd:function(){
+  var d=L.DomUtil.create("div","modebar leaflet-bar");
+  modeDefs.forEach(function(md){var b=L.DomUtil.create("a","modebtn",d);b.href="#";b.title=md.label;b.innerHTML=md.icon;modeBtns[md.k]=b;
+    L.DomEvent.on(b,"click",function(ev){L.DomEvent.stop(ev);setMode(md.k);});});
+  L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);
+  return d;}});
+try{map.addControl(new ModeToolbar({position:"topleft"}));}catch(e){}
+function currentMode(){if(estMode)return"estimate";if(boxMode)return"select";if(picking)return"add";return"pan";}
+function updateModeUI(){if(!modeBtns.pan)return;var m=currentMode();Object.keys(modeBtns).forEach(function(k){if(k===m)modeBtns[k].classList.add("on");else modeBtns[k].classList.remove("on");});}
+function setMode(m){
+  if(estMode&&m!=="estimate")estBtn.click();
+  if(boxMode&&m!=="select")boxBtn.click();
+  if(picking&&m!=="add"){picking=false;map.getContainer().style.cursor="";}
+  if(m==="estimate"&&!estMode)estBtn.click();
+  else if(m==="select"&&!boxMode)boxBtn.click();
+  else if(m==="add"){if(!form.classList.contains("open"))openForm();picking=true;map.getContainer().style.cursor="crosshair";coordHint.textContent="Add mode — click the map to place the spot.";coordHint.classList.add("armed");}
+  updateModeUI();
+}
+updateModeUI();
 
 /* mobile */
 const panel=$("panel");
