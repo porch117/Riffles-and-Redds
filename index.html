@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Riffle & Redd — Salmonid Field Log</title>
+<title>Riffle & Redd - Stream Maps & Live Flows</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -696,6 +696,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .enter:active{transform:translateY(1px)}
   .enter:focus-visible{outline:2px solid var(--foam);outline-offset:3px}
   .splash .foot{margin-top:22px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:rgba(207,216,207,.55)}
+  .splash-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity 1s ease}
+  .splash-photo.loaded{opacity:.5}
+  .splash-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(120% 90% at 50% 6%,rgba(27,76,86,.68) 0%,rgba(16,50,58,.85) 45%,rgba(8,25,29,.95) 100%)}
+  .splash .riffles,.splash .emblem,.splash .eyebrow,.splash h1,.splash .tag,.splash .caps,.splash .enter,.splash .foot,.splash .foot2{position:relative;z-index:2}
+  .splash h1{text-shadow:0 3px 24px rgba(0,0,0,.5)}
+  .splash .foot2{margin-top:5px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;color:rgba(207,216,207,.4);font-style:italic;position:relative;z-index:2}
+  .cap .ic .usgs-ic{width:24px;height:24px;object-fit:contain;vertical-align:-3px;border-radius:4px}
+  .usgs-btn{width:15px;height:15px;object-fit:contain;vertical-align:-3px;border-radius:3px;margin-right:1px}
+  .splash .photo-credit{position:absolute;bottom:10px;right:14px;z-index:3;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.04em;color:rgba(207,216,207,.5);margin:0}
+  .splash .photo-credit a{color:rgba(207,216,207,.7);text-decoration:none}
 
   .panel{background:var(--deepwater);color:var(--foam);display:flex;flex-direction:column;border-right:1px solid var(--line);min-height:0}
   .brand{padding:18px 20px 14px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center}
@@ -758,13 +768,25 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .fema-ctl .fema-hint{font-size:10px;color:var(--riffle);opacity:.8;padding-top:4px}
   .basemap-ctl .base-sep{border:none;border-top:1px solid var(--line);margin:6px 0 4px}
   @media (max-width:760px){
-    .leaflet-top.leaflet-right{max-width:66vw;overflow:auto;max-height:72vh}
-    .leaflet-control-layers-expanded{font-size:11.5px;padding:6px 8px}
-    .fema-ctl{font-size:11.5px}
+    .leaflet-control-zoom{display:none!important}
+    .leaflet-top.leaflet-left{margin-top:66px}
+    .modebar{border-radius:13px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.35);margin-top:0!important;border:none!important}
+    .modebar .modebtn{width:46px;height:46px;line-height:46px}
+    .modebar .modebtn svg{width:19px;height:19px;margin-top:0}
+    .instr-btn{border-radius:13px!important;box-shadow:0 3px 10px rgba(0,0,0,.35);margin-top:10px!important;height:38px!important;line-height:38px!important}
+    .leaflet-top.leaflet-right{max-width:62vw;overflow:visible;max-height:none}
+    .fema-ctl,.basemap-ctl{font-size:13px;border-radius:13px;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+    .fema-ctl .fema-hdr{padding:10px 13px;font-size:13.5px}
+    .fema-ctl label{padding:6px 0}
+    .fema-ctl input{width:18px;height:18px;margin-right:9px}
+    .mapbtn{width:50px;height:50px;bottom:30px;right:14px;font-size:21px;border-radius:15px}
+    .leaflet-control-scale{margin-bottom:14px!important}
     .field.two{flex-wrap:wrap}
     .field.two>div{min-width:118px}
-    .tbtn{width:40px;height:36px;font-size:16px}
     .estout{font-size:12px}
+    .flowpop .tabbtn{padding:8px 11px;font-size:13.5px}
+    .flowpop .tabnav button{padding:7px 12px;font-size:15px}
+    .flowpop .avgsel{font-size:14px;padding:6px 8px}
   }
   .listwrap{flex:1;overflow-y:auto;min-height:0}
   .count{font-family:"IBM Plex Mono";font-size:11px;color:var(--riffle);padding:14px 20px 6px;letter-spacing:.05em}
@@ -917,6 +939,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <body>
 
 <div class="splash" id="splash">
+  <img class="splash-photo" id="splashPhoto" alt="" />
+  <div class="splash-overlay"></div>
   <svg class="riffles" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
     <path d="M-50,160 Q200,130 450,160 T950,160 T1450,160"/><path d="M-50,300 Q200,270 450,300 T950,300 T1450,300"/>
     <path d="M-50,470 Q200,440 450,470 T950,470 T1450,470"/><path d="M-50,620 Q200,590 450,620 T950,620 T1450,620"/>
@@ -933,14 +957,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
   </svg>
   <p class="eyebrow">made by naturewithman</p>
   <h1>Riffle&nbsp;&amp;&nbsp;Redd</h1>
-  <p class="tag">Map the water, log every catch, and read live river flows — a field notebook for trout &amp; salmon that usually dies in a spreadsheet.</p>
+  <p class="tag">Map trout and salmon water, read live USGS river flows, and scout conditions before you go. A free, open field map for the streams you fish.</p>
   <div class="caps">
-    <div class="cap"><div class="ic">📍</div><h3>Mark &amp; log</h3><p>Pin spots and log catches with fly, size, temp, and date.</p></div>
-    <div class="cap"><div class="ic">🌊</div><h3>Live flows</h3><p>Real-time USGS streamflow and water temp, tap any gauge.</p></div>
-    <div class="cap"><div class="ic">🗺️</div><h3>Read the river</h3><p>USGS topo and high-res aerial, side by side.</p></div>
+    <div class="cap"><div class="ic">📍</div><h3>Pin &amp; organize</h3><p>Mark access, parking, promising runs, and structure. Group pins into folders for each river.</p></div>
+    <div class="cap"><div class="ic"><img class="usgs-ic" src="https://media.licdn.com/dms/image/v2/D560BAQFkpycSdKyG3g/company-logo_200_200/company-logo_200_200/0/1718306329610/usgs_logo?e=2147483647&amp;v=beta&amp;t=7_zBsrZRPYmpjtoIoQKKAa_P2XYCC1GvCeWsTcv7ppg" alt="USGS" onerror="this.replaceWith('🌊')" /></div><h3>Live flows</h3><p>Real-time USGS streamflow, gage height, and water temperature, with a 72-hour hydrograph.</p></div>
+    <div class="cap"><div class="ic">🗺️</div><h3>Read the river</h3><p>USGS topo, high-resolution aerial, LiDAR hillshade, and FEMA flood layers.</p></div>
+    <div class="cap"><div class="ic">📐</div><h3>Estimate anywhere</h3><p>Click any river to estimate its flow and a channel cross-section from the nearest gage.</p></div>
+    <div class="cap"><div class="ic">📈</div><h3>Trends &amp; forecasts</h3><p>See how today ranks against the record, plus recession and long-term flow trends.</p></div>
+    <div class="cap"><div class="ic">🗂️</div><h3>GIS ready</h3><p>Import and export GeoJSON and Shapefile, and draw or box-select right on the map.</p></div>
   </div>
   <button class="enter" id="enterBtn">Open the map →</button>
-  <p class="foot">TROUT &amp; SALMON · BUILT STREAMSIDE</p>
+  <p class="foot">MADE FOR TROUT &amp; SALMON ANGLERS · BUILT BY NATUREWITHMAN</p>
+  <p class="foot2">designed to raise awareness for the rivers we love</p>
+  <p class="photo-credit">Trout photo via <a href="https://unsplash.com/s/photos/trout" target="_blank" rel="noopener">Unsplash</a> · <span id="photoCred"></span></p>
 </div>
 
 <div class="app">
@@ -958,7 +987,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="scroll">
       <div class="controls">
         <div class="toolbar">
-          <button class="btn btn-ghost toggle" id="flowBtn" style="flex:1" title="Show live stream gages">🌊 Gages</button>
+          <button class="btn btn-ghost toggle" id="flowBtn" style="flex:1" title="Show live stream gages"><img class="usgs-btn" src="https://media.licdn.com/dms/image/v2/D560BAQFkpycSdKyG3g/company-logo_200_200/company-logo_200_200/0/1718306329610/usgs_logo?e=2147483647&amp;v=beta&amp;t=7_zBsrZRPYmpjtoIoQKKAa_P2XYCC1GvCeWsTcv7ppg" alt="" onerror="this.replaceWith('🌊')" /> Gages</button>
           <button class="btn btn-ghost toggle" id="estBtn" style="flex:1" title="Estimate flow at a point">✎ Estimate</button>
         </div>
         <div class="datastatus" id="dataStatus"></div>
@@ -1668,6 +1697,11 @@ var InstrCtl=L.Control.extend({onAdd:function(){var d=L.DomUtil.create("a","inst
 try{map.addControl(new InstrCtl({position:"topleft"}));}catch(e){}
 })();
 
+/* splash trout photo (random, Unsplash, credited) */
+(function(){var photos=[["photo-1722797657686-85e4b8a51604","The New York Public Library","nypl"],["photo-1638238264535-930369285449","Jack Charles","jackcharles"],["photo-1552340745-d5955f49c5c5","gaspar zaldo","gasparzaldo"],["photo-1616459943793-f4fca51b6647","Brandon","greener_30"],["photo-1689709105115-e11810b6c425","Matthew McBrayer","matthewwmcb"],["photo-1610741620547-1191d693e43d","Wes Walker","southwes"],["photo-1613515580542-468467f298f5","John Werner","johnwernerphotography"],["photo-1565269424908-3e4c73e5abdb","Sara Kurfess","stereophototyp"]];
+var p=photos[Math.floor(Math.random()*photos.length)],img=document.getElementById("splashPhoto");
+if(img){img.onload=function(){img.classList.add("loaded");};img.src="https://images.unsplash.com/"+p[0]+"?fm=jpg&w=1600&q=70&auto=format&fit=crop";}
+var cr=document.getElementById("photoCred");if(cr)cr.innerHTML='<a href="https://unsplash.com/@'+p[2]+'" target="_blank" rel="noopener">'+p[1]+'</a>';})();
 /* mobile */
 const panel=$("panel");
 $("menuBtn").addEventListener("click",()=>panel.classList.toggle("show"));
