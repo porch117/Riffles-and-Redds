@@ -829,6 +829,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .flowpop .trend{font-family:"IBM Plex Mono";font-size:10px;margin-left:4px;white-space:nowrap}
   .flowpop .trend.rising{color:#c0562f}.flowpop .trend.falling{color:#2f6f86}.flowpop .trend.steady{color:#6a7a75}
   .flowpop .hydro{margin:9px 0 2px;min-height:20px;font-size:11px;color:#6a7a75}
+  .flowpop .proj{margin:8px 0 2px;font-size:12px;color:var(--ink);line-height:1.5;background:#eef3ee;border-left:3px solid var(--moss);border-radius:4px;padding:8px 10px}
+  .flowpop .proj:empty{display:none}
+  .flowpop .proj .ptag{display:inline-block;font-family:"IBM Plex Mono";font-size:9px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 6px;border-radius:20px;margin-right:5px}
+  .flowpop .proj .ptag.rec{background:var(--moss);color:#fff}
+  .flowpop .proj .ptag.rise{background:#c0562f;color:#fff}
+  .flowpop .proj .ptag.flat{background:#6a7a75;color:#fff}
+  .flowpop .proj .co{color:#7a8a85}
   .flowpop .spark{display:block}
   .flowpop .sparklbl{display:flex;justify-content:space-between;font-family:"IBM Plex Mono";font-size:9px;color:#6a7a75;margin-top:-1px}
   .flowpop .foot{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -1284,6 +1291,7 @@ function flowPopup(g){
   rows+='<p id="norm-'+g.no+'" class="norm">Loading flow vs. normal…</p>';
   return '<div class="pop flowpop"><h3>🌊 '+esc(g.name)+'</h3>'+rows+
     '<div id="hydro-'+g.no+'" class="hydro">Loading 72-hr trend…</div>'+
+    '<div id="proj-'+g.no+'" class="proj"></div>'+
     '<p class="avg"><b>Avg flow:</b> <select class="avgsel" data-no="'+g.no+'"><option value="1d">1 day</option><option value="1w" selected>1 week</option><option value="1m">1 month</option><option value="3m">3 months</option><option value="1y">1 year</option><option value="por">period of record</option></select> <span id="avg-'+g.no+'">loading…</span></p>'+
     '<div class="fb"><span>Fly box · today\'s conditions</span>'+esc(flyBox(tF))+'</div>'+
     '<div class="fb spin"><span>Spin box · lures</span>'+esc(spinLures(tF))+'</div>'+
@@ -1374,10 +1382,13 @@ function loadAverages(g){
     .then(r=>{if(!r.ok)throw 0;return r.json();}).then(d=>{
       const ts=d&&d.value&&d.value.timeSeries&&d.value.timeSeries[0];
       g._dv=((ts&&ts.values[0]&&ts.values[0].value)||[]).map(v=>parseFloat(v.value)).filter(v=>!isNaN(v)&&v>-999990);
-      updateAvg(g);
+      updateAvg(g);renderProjection(g);
     }).catch(()=>{g._dv=null;updateAvg(g);});
 }
 function meanLast(arr,n){if(!arr||!arr.length)return null;const s=arr.slice(Math.max(0,arr.length-n));return s.reduce((a,b)=>a+b,0)/s.length;}
+function lstsq(xs,ys){var n=xs.length,sx=0,sy=0,sxx=0,sxy=0,syy=0;for(var i=0;i<n;i++){sx+=xs[i];sy+=ys[i];sxx+=xs[i]*xs[i];sxy+=xs[i]*ys[i];syy+=ys[i]*ys[i];}var d=n*sxx-sx*sx;if(d===0)return null;var m=(n*sxy-sx*sy)/d;var num=n*sxy-sx*sy,den=Math.sqrt((n*sxx-sx*sx)*(n*syy-sy*sy));var r2=den===0?0:Math.pow(num/den,2);return {slope:m,r2:r2};}
+function fitRecession(series){var n=series.length;if(n<5)return null;var recent=series.slice(Math.max(0,n-14));var m=recent.length;var pk=0;for(var i=0;i<m;i++){if(recent[i]>=recent[pk])pk=i;}var lastRise=recent[m-1]>recent[m-2];var tail=recent.slice(pk);if(lastRise&&(m-1-pk)<=1)return {regime:"rising",qNow:recent[m-1]};if(tail.length<4||tail[tail.length-1]>=tail[0])return {regime:"steady",qNow:recent[m-1]};var xs=[],ys=[];for(var j=0;j<tail.length;j++){if(tail[j]>0){xs.push(j);ys.push(Math.log(tail[j]));}}if(xs.length<3)return {regime:"steady",qNow:recent[m-1]};var f=lstsq(xs,ys);if(!f||f.slope>=0)return {regime:"steady",qNow:recent[m-1]};return {regime:"receding",k:f.slope,r2:f.r2,qNow:tail[tail.length-1]};}
+function renderProjection(g){var el=document.getElementById("proj-"+g.no);if(!el)return;if(!g._dv||g._dv.length<6){el.innerHTML="";return;}var r=fitRecession(g._dv);if(!r){el.innerHTML="";return;}if(r.regime==="rising"){el.innerHTML='<span class="ptag rise">Rising</span> flows are climbing — likely rain-driven. Recession projection resumes once it crests.';return;}if(r.regime==="steady"){el.innerHTML='<span class="ptag flat">Steady</span> baseflow is flat — little change expected over the next several days.';return;}var pctDay=Math.round((1-Math.exp(r.k))*100);var q3=Math.round(r.qNow*Math.exp(r.k*3)),q7=Math.round(r.qNow*Math.exp(r.k*7));var d3=new Date(Date.now()+3*864e5),d7=new Date(Date.now()+7*864e5);var fmt=function(dt){return dt.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});};var caveat=r.r2<0.7?' <span class="co">(noisy fit — treat as rough)</span>':'';el.innerHTML='<span class="ptag rec">Receding ~'+pctDay+'%/day</span> baseflow recession — projected ≈ '+q3.toLocaleString()+' cfs by '+fmt(d3)+', ≈ '+q7.toLocaleString()+' cfs by '+fmt(d7)+'.'+caveat;}
 function updateAvg(g){
   const sel=document.querySelector('.avgsel[data-no="'+g.no+'"]'),out=document.getElementById("avg-"+g.no);
   if(!sel||!out)return;const w=sel.value;let v=null;
