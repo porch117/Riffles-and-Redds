@@ -1579,6 +1579,7 @@ $("eCalc").addEventListener("click",()=>{
   if(Q>0&&S>0&&n>0&&b>=0&&z>=0){const y=manningDepth(Q,n,S,b,z);if(y>0){const A=(b+z*y)*y,V=Q/A,T=b+2*z*y,Fr=V/Math.sqrt(32.2*A/(T||1));
     xs=drawXS(b,z,y)+'<div class="xsstats"><span>depth <b>'+y.toFixed(2)+' ft</b></span><span>velocity <b>'+V.toFixed(2)+' ft/s</b></span><span>top width <b>'+T.toFixed(1)+' ft</b></span><span>Froude <b>'+Fr.toFixed(2)+'</b> '+(Fr>1?"(supercrit.)":"(subcrit.)")+'</span></div><p class="co" style="margin:6px 0 0">Idealized trapezoid, so swap in a surveyed section for real geometry.</p>';}}
   $("xsout").innerHTML=xs;});
+["eApin","eQref","eAref","ePhi","eS","eN","eB","eZ"].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener("input",function(){tryEstimate();});});
 /* StreamStats auto-fill: delineate -> basin characteristics -> DRNAREA */
 function setEst(t){const e=$("estHint");if(e)e.textContent=t;}
 function findDRNAREA(obj){let found=null;(function walk(o){if(found!=null||o==null||typeof o!=="object")return;if(Array.isArray(o)){o.forEach(walk);return;}
@@ -1586,7 +1587,7 @@ function findDRNAREA(obj){let found=null;(function walk(o){if(found!=null||o==nu
   const val=(o.value!=null?o.value:o.Value);
   if(code.toUpperCase()==="DRNAREA"&&val!=null&&!isNaN(parseFloat(val))){found=parseFloat(val);return;}
   Object.keys(o).forEach(k=>walk(o[k]));})(obj);return found;}
-function applyDA(da){$("eApin").value=Math.round(da*100)/100;setEst("Drainage area filled: "+da+" mi\u00B2.");tryEstimate();}
+function applyDA(da){$("eApin").value=Math.round(da*100)/100;setEst("Drainage area filled: "+da+" mi\u00B2.");$("eApin").dispatchEvent(new Event("input"));}
 $("ssAuto").addEventListener("click",()=>{
   if(!estPt){setEst("Click the map to set your point first.");return;}
   const region=(($("eRegion").value||"").trim()).toUpperCase();
@@ -1658,7 +1659,7 @@ function autoRegion(){try{fetch("https://geo.fcc.gov/api/census/area?lat="+estPt
 function autoGage(){try{var c=estPt,d=0.25;var w=(c.lng-d).toFixed(4),s=(c.lat-d).toFixed(4),e2=(c.lng+d).toFixed(4),n=(c.lat+d).toFixed(4);
   fetch("https://waterservices.usgs.gov/nwis/iv/?format=json&bBox="+w+","+s+","+e2+","+n+"&parameterCd=00060&siteStatus=active").then(function(r){return r.json();}).then(function(dd){var ts=(dd&&dd.value&&dd.value.timeSeries)||[];var best=null,bd=Infinity;
     ts.forEach(function(t){try{var si=t.sourceInfo,no=si.siteCode[0].value,la=+si.geoLocation.geogLocation.latitude,lo=+si.geoLocation.geogLocation.longitude;var vv=t.values[0]&&t.values[0].value[0];var q=vv?parseFloat(vv.value):NaN;if(isNaN(q)||q<=-999990)return;var dist=(la-c.lat)*(la-c.lat)+(lo-c.lng)*(lo-c.lng);if(dist<bd){bd=dist;best={no:no,q:q,la:la,lo:lo};}}catch(e3){}});
-    if(best){var dLat=best.la-c.lat,dLng=(best.lo-c.lng)*Math.cos(c.lat*Math.PI/180);estNearGage={no:best.no,q:best.q,distKm:111*Math.sqrt(dLat*dLat+dLng*dLng)};$("eQref").value=Math.round(best.q);fetch("https://waterservices.usgs.gov/nwis/site/?format=rdb&sites="+best.no+"&siteOutput=expanded").then(function(r){return r.text();}).then(function(txt){var rows=parseRDB(txt);if(rows[0]&&rows[0].drain_area_va&&!isNaN(parseFloat(rows[0].drain_area_va)))$("eAref").value=parseFloat(rows[0].drain_area_va);if(typeof tryEstimate==="function")tryEstimate();}).catch(function(){});}
+    if(best){var dLat=best.la-c.lat,dLng=(best.lo-c.lng)*Math.cos(c.lat*Math.PI/180);estNearGage={no:best.no,q:best.q,distKm:111*Math.sqrt(dLat*dLat+dLng*dLng)};$("eQref").value=Math.round(best.q);$("eQref").dispatchEvent(new Event("input"));fetch("https://waterservices.usgs.gov/nwis/site/?format=rdb&sites="+best.no+"&siteOutput=expanded").then(function(r){return r.text();}).then(function(txt){var rows=parseRDB(txt);if(rows[0]&&rows[0].drain_area_va&&!isNaN(parseFloat(rows[0].drain_area_va)))$("eAref").value=parseFloat(rows[0].drain_area_va);$("eAref").dispatchEvent(new Event("input"));}).catch(function(){});}
   }).catch(function(){});}catch(e){}}
 
 /* ===== mode toolbar: Pan / Add / Estimate / Select ===== */
