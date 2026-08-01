@@ -709,6 +709,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .toolbar .btn:hover{border-color:var(--brookbelly);background:rgba(232,150,62,.15)}
   .toolbar .btn.on{background:var(--brookbelly);border-color:var(--brookbelly);color:#231205}
   .toolbar .usgs-btn{width:17px;height:17px}
+  .opt{font-weight:400;font-size:10px;color:var(--riffle);text-transform:none;letter-spacing:0;opacity:.7}
+  .estprog{display:none;margin:9px 0 4px}
+  .progbar{height:5px;background:rgba(243,239,228,.12);border-radius:3px;overflow:hidden}
+  .progfill{height:100%;background:var(--brookbelly);border-radius:3px;transition:width .4s ease}
+  .progsteps{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+  .progsteps .stp{font-family:"IBM Plex Mono",monospace;font-size:9.5px;padding:2px 8px;border-radius:20px;letter-spacing:.03em}
+  .progsteps .stp.wait{background:rgba(243,239,228,.08);color:var(--riffle)}
+  .progsteps .stp.ok{background:rgba(106,143,95,.28);color:#aecaa4}
+  .progsteps .stp.ok::before{content:"\2713 "}
+  .progsteps .stp.no{background:rgba(192,86,47,.24);color:#eaa084}
+  .progsteps .stp.no::before{content:"\2715 "}
   .splash .photo-credit{position:absolute;bottom:10px;right:14px;z-index:3;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.04em;color:rgba(207,216,207,.5);margin:0}
   .splash .photo-credit a{color:rgba(207,216,207,.7);text-decoration:none}
 
@@ -1018,23 +1029,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
       <div class="form" id="form">
         <h2>New spot</h2>
+        <div class="field"><label>Step 1 &middot; Location</label><div class="coordhint" id="coordHint">Tap Pick on map, then click the water.</div></div>
+        <div class="row" style="margin-bottom:13px"><button class="btn btn-primary" id="pickBtn" style="flex:1">📍 Pick on map</button></div>
         <div class="field"><label for="fName">Name</label><input id="fName" placeholder="e.g. Junction Pool" /></div>
-        <div class="field"><label for="fType">Type</label>
-          <input list="typeList" id="fType" placeholder="Pool" />
+        <div class="field"><label for="fType">Type <span class="opt">optional</span></label>
+          <input list="typeList" id="fType" placeholder="e.g. Pool, Access, Parking" />
           <datalist id="typeList"><option>Parking</option><option>Access trail</option><option>Riffle</option><option>Pool</option><option>Structure</option></datalist></div>
-        <div class="field"><label for="fSpecies">Species</label>
+        <div class="field"><label for="fSpecies">Species <span class="opt">optional</span></label>
           <input list="spList" id="fSpecies" placeholder="Brown / Brook / Rainbow" />
-          <datalist id="spList"><option>Brown</option><option>Brook</option><option>Rainbow</option><option>None</option></datalist></div>
-        <div class="field"><label>Pin icon (hover for names)</label><div id="iconPicker" class="iconpicker"></div></div>
-        <div class="field"><label for="fNotes">Notes</label><textarea id="fNotes" placeholder="Notes, structure, access…"></textarea></div>
-        <div class="field"><label>Location</label><div class="coordhint" id="coordHint">No point set — tap "Pick on map," then click the map.</div></div>
-        <div class="row" style="margin-bottom:8px"><button class="btn btn-ghost" id="pickBtn">📍 Pick on map</button></div>
+          <datalist id="spList"><option>Brown</option><option>Brook</option><option>Rainbow</option></datalist></div>
+        <div class="field"><label>Pin icon <span class="opt">optional</span></label><div id="iconPicker" class="iconpicker"></div></div>
+        <div class="field"><label for="fNotes">Notes <span class="opt">optional</span></label><textarea id="fNotes" placeholder="Notes, structure, access…"></textarea></div>
         <div class="row"><button class="btn btn-primary" id="saveBtn">Save spot</button><button class="btn btn-ghost" id="cancelBtn">Cancel</button></div>
       </div>
 
       <div class="estpanel" id="estPanel">
         <h2>Ungaged flow estimate</h2>
-        <p class="esthint" id="estHint">Turn this on, then click a river — it fetches the data and estimates automatically.</p>
+        <p class="esthint" id="estHint">Turn this on, then click a river. It fetches the data and estimates automatically.</p>
+        <div id="estProg" class="estprog"></div>
         <div class="estout" id="estQ">—</div>
         <div id="xsout"></div>
         <p class="datalbl collapse-hdr" id="advHdr" style="margin-top:12px">Advanced — inputs &amp; assumptions <span class="chev">▸</span></p>
@@ -1248,9 +1260,9 @@ $("saveBtn").addEventListener("click",()=>{
   const name=$("fName").value.trim();
   if(!name){$("fName").focus();coordHint.textContent="Give the spot a name first.";return}
   if(!pending){coordHint.textContent='Set a point: tap "Pick on map," then click the map.';coordHint.classList.add("armed");return}
-  const type=$("fType").value.trim()||"Pool";
-  if(editingId){var ex=spots.find(function(x){return x.id===editingId;});if(ex){ex.name=name;ex.type=type;ex.species=$("fSpecies").value.trim()||"None";ex.notes=$("fNotes").value.trim();ex.lat=pending.lat;ex.lng=pending.lng;ex.icon=selectedIcon||"";}save();closeForm();render();setGis("Spot updated.");return;}
-  const rec={id:"s"+Date.now()+Math.random().toString(36).slice(2,6),name,type,species:$("fSpecies").value.trim()||"None",notes:$("fNotes").value.trim(),lat:pending.lat,lng:pending.lng,icon:selectedIcon||"",folder:""};
+  const type=$("fType").value.trim();
+  if(editingId){var ex=spots.find(function(x){return x.id===editingId;});if(ex){ex.name=name;ex.type=type;ex.species=$("fSpecies").value.trim();ex.notes=$("fNotes").value.trim();ex.lat=pending.lat;ex.lng=pending.lng;ex.icon=selectedIcon||"";}save();closeForm();render();setGis("Spot updated.");return;}
+  const rec={id:"s"+Date.now()+Math.random().toString(36).slice(2,6),name,type,species:$("fSpecies").value.trim(),notes:$("fNotes").value.trim(),lat:pending.lat,lng:pending.lng,icon:selectedIcon||"",folder:""};
   spots.push(rec);save();closeForm();render()});
 
 /* export / import */
@@ -1640,7 +1652,8 @@ $("addBtn").addEventListener("contextmenu",function(ev){ev.preventDefault();show
 $("gisHdr").addEventListener("click",function(){$("gisHdr").classList.toggle("open");$("gisBody").classList.toggle("open");});
 $("advHdr").addEventListener("click",function(){$("advHdr").classList.toggle("open");$("advBody").classList.toggle("open");});
 function tryEstimate(){var ap=parseFloat($("eApin").value),qr=parseFloat($("eQref").value),ar=parseFloat($("eAref").value);if((ap>0&&qr>0&&ar>0)||(estNearGage&&estNearGage.distKm<1.0&&qr>0)){$("eCalc").click();return true;}return false;}
-function scheduleAuto(){var tries=0;setEst("Fetching region, nearest gage & drainage area…");var iv=setInterval(function(){tries++;if(tryEstimate()){clearInterval(iv);}else if(tries>45){clearInterval(iv);$("advHdr").classList.add("open");$("advBody").classList.add("open");setEst("Couldn't pull the drainage area automatically (StreamStats often blocks browser requests). I opened Advanced below. If the gage flow and area are filled, just add your point's drainage area and hit Re-estimate.");}},600);}
+function estStepBar(reg,ap,qr,ar,failed){var n=(reg?1:0)+(ap?1:0)+(qr?1:0)+(ar?1:0),pct=Math.round(n/4*100);function s(ok,lbl){return '<span class="stp '+(ok?"ok":(failed?"no":"wait"))+'">'+lbl+'</span>';}return '<div class="progbar"><div class="progfill" style="width:'+pct+'%"></div></div><div class="progsteps">'+s(reg,"region")+s(ap,"point area")+s(qr,"gage flow")+s(ar,"gage area")+'</div>';}
+function scheduleAuto(){var tries=0,prog=document.getElementById("estProg");setEst("Fetching the data for this point\u2026");if(prog)prog.style.display="block";var iv=setInterval(function(){tries++;var reg=(($("eRegion").value||"").trim())!=="",ap=parseFloat($("eApin").value)>0,qr=parseFloat($("eQref").value)>0,ar=parseFloat($("eAref").value)>0;if(prog)prog.innerHTML=estStepBar(reg,ap,qr,ar,false);if(tryEstimate()){clearInterval(iv);if(prog)prog.style.display="none";}else if(tries>45){clearInterval(iv);if(prog)prog.innerHTML=estStepBar(reg,ap,qr,ar,true);$("advHdr").classList.add("open");$("advBody").classList.add("open");setEst("Some pieces couldn't be fetched (see the red items above). A red gage flow or gage area usually just means no nearby gage was found. Fill what's missing in Advanced and hit Re-estimate.");}},500);}
 function autoRegion(){try{fetch("https://geo.fcc.gov/api/census/area?lat="+estPt.lat+"&lon="+estPt.lng+"&format=json").then(function(r){return r.json();}).then(function(d){var st=d&&d.results&&d.results[0]&&d.results[0].state_code;if(st){$("eRegion").value=st;var b=$("ssAuto");if(b)b.click();}}).catch(function(){});}catch(e){}}
 function autoGage(){try{var c=estPt,d=0.25;var w=(c.lng-d).toFixed(4),s=(c.lat-d).toFixed(4),e2=(c.lng+d).toFixed(4),n=(c.lat+d).toFixed(4);
   fetch("https://waterservices.usgs.gov/nwis/iv/?format=json&bBox="+w+","+s+","+e2+","+n+"&parameterCd=00060&siteStatus=active").then(function(r){return r.json();}).then(function(dd){var ts=(dd&&dd.value&&dd.value.timeSeries)||[];var best=null,bd=Infinity;
