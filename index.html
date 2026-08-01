@@ -1045,7 +1045,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       </div>
 
       <div class="estpanel" id="estPanel">
-        <h2>Ungaged flow estimate <span class="buildtag">build R8 &middot; reactive</span></h2>
+        <h2>Ungaged flow estimate <span class="buildtag">build R9 &middot; fixed</span></h2>
         <p class="esthint" id="estHint">Turn this on, then click a river. It fetches the data and estimates automatically.</p>
         <div id="estProg" class="estprog"></div>
         <div class="estout" id="estQ">—</div>
@@ -1653,6 +1653,8 @@ function editSpot(id){var s=spots.find(function(x){return x.id===id;});if(!s)ret
 $("addBtn").addEventListener("contextmenu",function(ev){ev.preventDefault();showCtx(ev.clientX,ev.clientY,[{label:"+ New empty folder",action:newFolder},{label:"Collapse all groups",action:function(){folders.forEach(function(f){collapsedGroups[f]=true;});render();}},{label:"Expand all groups",action:function(){folders.forEach(function(f){collapsedGroups[f]=false;});render();}}]);});
 $("gisHdr").addEventListener("click",function(){$("gisHdr").classList.toggle("open");$("gisBody").classList.toggle("open");});
 $("advHdr").addEventListener("click",function(){$("advHdr").classList.toggle("open");$("advBody").classList.toggle("open");});
+var estNearGage=null;
+function sig3(x){if(!(x>0))return Math.round(x);var e=Math.pow(10,2-Math.floor(Math.log10(x)));return Math.round(x*e)/e;}
 function tryEstimate(){var ap=parseFloat($("eApin").value),qr=parseFloat($("eQref").value),ar=parseFloat($("eAref").value);if((ap>0&&qr>0&&ar>0)||(estNearGage&&estNearGage.distKm<1.0&&qr>0)){$("eCalc").click();return true;}return false;}
 function estStepBar(reg,ap,qr,ar,failed){var n=(reg?1:0)+(ap?1:0)+(qr?1:0)+(ar?1:0),pct=Math.round(n/4*100);function s(ok,lbl){return '<span class="stp '+(ok?"ok":(failed?"no":"wait"))+'">'+lbl+'</span>';}return '<div class="progbar"><div class="progfill" style="width:'+pct+'%"></div></div><div class="progsteps">'+s(reg,"region")+s(ap,"point area")+s(qr,"gage flow")+s(ar,"gage area")+'</div>';}
 function scheduleAuto(){var tries=0,prog=document.getElementById("estProg");setEst("Fetching the data for this point\u2026");if(prog)prog.style.display="block";var iv=setInterval(function(){tries++;var reg=(($("eRegion").value||"").trim())!=="",ap=parseFloat($("eApin").value)>0,qr=parseFloat($("eQref").value)>0,ar=parseFloat($("eAref").value)>0;if(prog)prog.innerHTML=estStepBar(reg,ap,qr,ar,false);if(tryEstimate()){clearInterval(iv);if(prog)prog.style.display="none";}else if(tries>45){clearInterval(iv);if(prog)prog.innerHTML=estStepBar(reg,ap,qr,ar,true);$("advHdr").classList.add("open");$("advBody").classList.add("open");setEst("Some pieces couldn't be fetched (see the red items above). A red gage flow or gage area usually just means no nearby gage was found. Fill what's missing in Advanced and hit Re-estimate.");}},500);}
