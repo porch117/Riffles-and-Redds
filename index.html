@@ -704,6 +704,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .splash .foot2{margin-top:5px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;color:rgba(207,216,207,.4);font-style:italic;position:relative;z-index:2}
   .cap .ic .usgs-ic{width:24px;height:24px;object-fit:contain;vertical-align:-3px;border-radius:4px}
   .usgs-btn{width:15px;height:15px;object-fit:contain;vertical-align:-3px;border-radius:3px;margin-right:1px}
+  .toollbl{margin:0 0 8px!important}
+  .toolbar .btn{padding:13px 8px;font-size:14px;font-weight:600;border:1.5px solid var(--line);background:rgba(232,150,62,.07);border-radius:12px;line-height:1.35}
+  .toolbar .btn:hover{border-color:var(--brookbelly);background:rgba(232,150,62,.15)}
+  .toolbar .btn.on{background:var(--brookbelly);border-color:var(--brookbelly);color:#231205}
+  .toolbar .usgs-btn{width:17px;height:17px}
   .splash .photo-credit{position:absolute;bottom:10px;right:14px;z-index:3;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.04em;color:rgba(207,216,207,.5);margin:0}
   .splash .photo-credit a{color:rgba(207,216,207,.7);text-decoration:none}
 
@@ -986,6 +991,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
     <div class="scroll">
       <div class="controls">
+        <p class="datalbl toollbl">Live flows &amp; flow estimate</p>
         <div class="toolbar">
           <button class="btn btn-ghost toggle" id="flowBtn" style="flex:1" title="Show live stream gages"><img class="usgs-btn" src="https://media.licdn.com/dms/image/v2/D560BAQFkpycSdKyG3g/company-logo_200_200/company-logo_200_200/0/1718306329610/usgs_logo?e=2147483647&amp;v=beta&amp;t=7_zBsrZRPYmpjtoIoQKKAa_P2XYCC1GvCeWsTcv7ppg" alt="" onerror="this.replaceWith('🌊')" /> Gages</button>
           <button class="btn btn-ghost toggle" id="estBtn" style="flex:1" title="Estimate flow at a point">✎ Estimate</button>
@@ -1116,6 +1122,7 @@ function closeSplash(){splash.classList.add("hide");try{localStorage.setItem("rr
 $("enterBtn").addEventListener("click",closeSplash);
 try{if(localStorage.getItem("rr.seen"))splash.classList.add("hide")}catch(e){}
 $("guideBtn").addEventListener("click",()=>splash.classList.remove("hide"));
+var _brand=document.querySelector(".panel .brand");if(_brand){_brand.style.cursor="pointer";_brand.title="Show the welcome screen";_brand.addEventListener("click",function(){splash.classList.remove("hide");});}
 
 /* storage */
 const KEY="riffleredd.spots.v1";let spots=[];
@@ -1633,7 +1640,7 @@ $("addBtn").addEventListener("contextmenu",function(ev){ev.preventDefault();show
 $("gisHdr").addEventListener("click",function(){$("gisHdr").classList.toggle("open");$("gisBody").classList.toggle("open");});
 $("advHdr").addEventListener("click",function(){$("advHdr").classList.toggle("open");$("advBody").classList.toggle("open");});
 function tryEstimate(){var ap=parseFloat($("eApin").value),qr=parseFloat($("eQref").value),ar=parseFloat($("eAref").value);if((ap>0&&qr>0&&ar>0)||(estNearGage&&estNearGage.distKm<1.0&&qr>0)){$("eCalc").click();return true;}return false;}
-function scheduleAuto(){var tries=0;setEst("Fetching region, nearest gage & drainage area…");var iv=setInterval(function(){tries++;if(tryEstimate()){clearInterval(iv);}else if(tries>45){clearInterval(iv);setEst("Couldn't fetch everything automatically (works best once hosted). Open Advanced, fill what's missing, and hit Re-estimate.");}},600);}
+function scheduleAuto(){var tries=0;setEst("Fetching region, nearest gage & drainage area…");var iv=setInterval(function(){tries++;if(tryEstimate()){clearInterval(iv);}else if(tries>45){clearInterval(iv);$("advHdr").classList.add("open");$("advBody").classList.add("open");setEst("Couldn't pull the drainage area automatically (StreamStats often blocks browser requests). I opened Advanced below. If the gage flow and area are filled, just add your point's drainage area and hit Re-estimate.");}},600);}
 function autoRegion(){try{fetch("https://geo.fcc.gov/api/census/area?lat="+estPt.lat+"&lon="+estPt.lng+"&format=json").then(function(r){return r.json();}).then(function(d){var st=d&&d.results&&d.results[0]&&d.results[0].state_code;if(st){$("eRegion").value=st;var b=$("ssAuto");if(b)b.click();}}).catch(function(){});}catch(e){}}
 function autoGage(){try{var c=estPt,d=0.25;var w=(c.lng-d).toFixed(4),s=(c.lat-d).toFixed(4),e2=(c.lng+d).toFixed(4),n=(c.lat+d).toFixed(4);
   fetch("https://waterservices.usgs.gov/nwis/iv/?format=json&bBox="+w+","+s+","+e2+","+n+"&parameterCd=00060&siteStatus=active").then(function(r){return r.json();}).then(function(dd){var ts=(dd&&dd.value&&dd.value.timeSeries)||[];var best=null,bd=Infinity;
