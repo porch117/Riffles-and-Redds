@@ -1538,7 +1538,7 @@ const estBtn=$("estBtn"),estPanel=$("estPanel");let estMode=false,estMarker=null
 estBtn.addEventListener("click",()=>{estMode=!estMode;estBtn.classList.toggle("on",estMode);estPanel.classList.toggle("open",estMode);
   if(estMode){map.getContainer().style.cursor="crosshair";$("estHint").textContent="Click the map to set your point.";if(window.innerWidth<=760)panel.classList.add("show");}
   else{map.getContainer().style.cursor="";}updateModeUI();});
-map.on("click",e=>{if(!estMode)return;estPt=e.latlng;$("eApin").value="";$("eQref").value="";$("eAref").value="";$("estQ").innerHTML="—";$("xsout").innerHTML="";autoRegion();autoGage();scheduleAuto();
+map.on("click",e=>{if(!estMode)return;estPt=e.latlng;estNearGage=null;$("eApin").value="";$("eQref").value="";$("eAref").value="";$("estQ").innerHTML="—";$("xsout").innerHTML="";autoRegion();autoGage();scheduleAuto();
   if(estMarker)estMarker.setLatLng(estPt);else estMarker=L.marker(estPt,{icon:L.divIcon({className:"",html:'<div class="estpin">\u25CE</div>',iconSize:[24,24],iconAnchor:[12,12]})}).addTo(map);
   $("estHint").textContent="Point set — fetching data…";});
 function manningDepth(Q,n,S,b,z){if(!(Q>0&&S>0&&n>0))return 0;const f=y=>{const A=(b+z*y)*y,P=b+2*y*Math.sqrt(1+z*z),R=A/(P||1);return (1.486/n)*A*Math.pow(R,2/3)*Math.sqrt(S)-Q;};let hi=0.02,it=0;while(f(hi)<0&&hi<1e5&&it++<80)hi*=1.8;let lo=0;for(let i=0;i<90;i++){const m=(lo+hi)/2;if(f(m)>0)hi=m;else lo=m;}return (lo+hi)/2;}
@@ -1551,14 +1551,15 @@ function drawXS(b,z,y){const T=b+2*z*y,bankH=y*1.4+1,topW=b+2*z*bankH,W=264,H=11
 $("eCalc").addEventListener("click",()=>{
   const Apin=parseFloat($("eApin").value),Qref=parseFloat($("eQref").value),Aref=parseFloat($("eAref").value),phi=parseFloat($("ePhi").value)||1;
   const S=parseFloat($("eS").value),n=parseFloat($("eN").value),b=parseFloat($("eB").value),z=parseFloat($("eZ").value);
-  if(!(Apin>0&&Qref>0&&Aref>0)){$("estQ").innerHTML='<span style="color:#e0a">Enter point area, gage flow, and gage area first.</span>';$("xsout").innerHTML="";return;}
-  const Q=Qref*Math.pow(Apin/Aref,phi);
-  $("estQ").innerHTML='Estimated flow \u2248 <b>'+Math.round(Q).toLocaleString()+' cfs</b> <span class="co">drainage-area ratio, \u03C6='+phi+'</span>';
+  var atGage=estNearGage&&estNearGage.distKm<1.0,Q=null,head="";
+  if(atGage){Q=estNearGage.q;var extra="";if(Apin>0&&Qref>0&&Aref>0){var qd=Qref*Math.pow(Apin/Aref,phi);extra=' <span class="co">(A drainage-area estimate here would read about '+sig3(qd).toLocaleString()+' cfs, but that method is only meant for ungaged points.)</span>';}head='<b>You\u2019re right at USGS Gage '+estNearGage.no+'.</b> It measures <b>'+Math.round(Q).toLocaleString()+' cfs</b> directly, so use that.'+extra;}
+  else if(Apin>0&&Qref>0&&Aref>0){Q=Qref*Math.pow(Apin/Aref,phi);head='Estimated flow \u2248 <b>'+sig3(Q).toLocaleString()+' cfs</b> <span class="co">drainage-area ratio from the nearest gage, \u03C6='+phi+'</span>';}
+  else{$("estQ").innerHTML='<span style="color:#e0a">Enter point area, gage flow, and gage area first.</span>';$("xsout").innerHTML="";return;}
+  $("estQ").innerHTML=head;
   let xs="";
-  if(S>0&&n>0&&b>=0&&z>=0){const y=manningDepth(Q,n,S,b,z);if(y>0){const A=(b+z*y)*y,V=Q/A,T=b+2*z*y,Fr=V/Math.sqrt(32.2*A/(T||1));
-    xs=drawXS(b,z,y)+'<div class="xsstats"><span>depth <b>'+y.toFixed(2)+' ft</b></span><span>velocity <b>'+V.toFixed(2)+' ft/s</b></span><span>top width <b>'+T.toFixed(1)+' ft</b></span><span>Froude <b>'+Fr.toFixed(2)+'</b> '+(Fr>1?"(supercrit.)":"(subcrit.)")+'</span></div><p class="co" style="margin:6px 0 0">Idealized trapezoid — swap in a surveyed section for real geometry.</p>';}}
+  if(Q>0&&S>0&&n>0&&b>=0&&z>=0){const y=manningDepth(Q,n,S,b,z);if(y>0){const A=(b+z*y)*y,V=Q/A,T=b+2*z*y,Fr=V/Math.sqrt(32.2*A/(T||1));
+    xs=drawXS(b,z,y)+'<div class="xsstats"><span>depth <b>'+y.toFixed(2)+' ft</b></span><span>velocity <b>'+V.toFixed(2)+' ft/s</b></span><span>top width <b>'+T.toFixed(1)+' ft</b></span><span>Froude <b>'+Fr.toFixed(2)+'</b> '+(Fr>1?"(supercrit.)":"(subcrit.)")+'</span></div><p class="co" style="margin:6px 0 0">Idealized trapezoid, so swap in a surveyed section for real geometry.</p>';}}
   $("xsout").innerHTML=xs;});
-
 /* StreamStats auto-fill: delineate -> basin characteristics -> DRNAREA */
 function setEst(t){const e=$("estHint");if(e)e.textContent=t;}
 function findDRNAREA(obj){let found=null;(function walk(o){if(found!=null||o==null||typeof o!=="object")return;if(Array.isArray(o)){o.forEach(walk);return;}
@@ -1635,8 +1636,8 @@ function scheduleAuto(){var tries=0;setEst("Fetching region, nearest gage & drai
 function autoRegion(){try{fetch("https://geo.fcc.gov/api/census/area?lat="+estPt.lat+"&lon="+estPt.lng+"&format=json").then(function(r){return r.json();}).then(function(d){var st=d&&d.results&&d.results[0]&&d.results[0].state_code;if(st){$("eRegion").value=st;var b=$("ssAuto");if(b)b.click();}}).catch(function(){});}catch(e){}}
 function autoGage(){try{var c=estPt,d=0.25;var w=(c.lng-d).toFixed(4),s=(c.lat-d).toFixed(4),e2=(c.lng+d).toFixed(4),n=(c.lat+d).toFixed(4);
   fetch("https://waterservices.usgs.gov/nwis/iv/?format=json&bBox="+w+","+s+","+e2+","+n+"&parameterCd=00060&siteStatus=active").then(function(r){return r.json();}).then(function(dd){var ts=(dd&&dd.value&&dd.value.timeSeries)||[];var best=null,bd=Infinity;
-    ts.forEach(function(t){try{var si=t.sourceInfo,no=si.siteCode[0].value,la=+si.geoLocation.geogLocation.latitude,lo=+si.geoLocation.geogLocation.longitude;var vv=t.values[0]&&t.values[0].value[0];var q=vv?parseFloat(vv.value):NaN;if(isNaN(q)||q<=-999990)return;var dist=(la-c.lat)*(la-c.lat)+(lo-c.lng)*(lo-c.lng);if(dist<bd){bd=dist;best={no:no,q:q};}}catch(e3){}});
-    if(best){$("eQref").value=Math.round(best.q);fetch("https://waterservices.usgs.gov/nwis/site/?format=rdb&sites="+best.no+"&siteOutput=expanded").then(function(r){return r.text();}).then(function(txt){var rows=parseRDB(txt);if(rows[0]&&rows[0].drain_area_va&&!isNaN(parseFloat(rows[0].drain_area_va)))$("eAref").value=parseFloat(rows[0].drain_area_va);}).catch(function(){});}
+    ts.forEach(function(t){try{var si=t.sourceInfo,no=si.siteCode[0].value,la=+si.geoLocation.geogLocation.latitude,lo=+si.geoLocation.geogLocation.longitude;var vv=t.values[0]&&t.values[0].value[0];var q=vv?parseFloat(vv.value):NaN;if(isNaN(q)||q<=-999990)return;var dist=(la-c.lat)*(la-c.lat)+(lo-c.lng)*(lo-c.lng);if(dist<bd){bd=dist;best={no:no,q:q,la:la,lo:lo};}}catch(e3){}});
+    if(best){var dLat=best.la-c.lat,dLng=(best.lo-c.lng)*Math.cos(c.lat*Math.PI/180);estNearGage={no:best.no,q:best.q,distKm:111*Math.sqrt(dLat*dLat+dLng*dLng)};$("eQref").value=Math.round(best.q);fetch("https://waterservices.usgs.gov/nwis/site/?format=rdb&sites="+best.no+"&siteOutput=expanded").then(function(r){return r.text();}).then(function(txt){var rows=parseRDB(txt);if(rows[0]&&rows[0].drain_area_va&&!isNaN(parseFloat(rows[0].drain_area_va)))$("eAref").value=parseFloat(rows[0].drain_area_va);}).catch(function(){});}
   }).catch(function(){});}catch(e){}}
 
 /* ===== mode toolbar: Pan / Add / Estimate / Select ===== */
