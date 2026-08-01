@@ -710,6 +710,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .toolbar .btn.on{background:var(--brookbelly);border-color:var(--brookbelly);color:#231205}
   .toolbar .usgs-btn{width:17px;height:17px}
   .opt{font-weight:400;font-size:10px;color:var(--riffle);text-transform:none;letter-spacing:0;opacity:.7}
+  .buildtag{font-family:"IBM Plex Mono",monospace;font-size:8.5px;font-weight:400;color:var(--riffle);opacity:.55;letter-spacing:.04em;vertical-align:middle;margin-left:4px}
   .estprog{display:none;margin:9px 0 4px}
   .progbar{height:5px;background:rgba(243,239,228,.12);border-radius:3px;overflow:hidden}
   .progfill{height:100%;background:var(--brookbelly);border-radius:3px;transition:width .4s ease}
@@ -1044,7 +1045,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       </div>
 
       <div class="estpanel" id="estPanel">
-        <h2>Ungaged flow estimate</h2>
+        <h2>Ungaged flow estimate <span class="buildtag">build R8 &middot; reactive</span></h2>
         <p class="esthint" id="estHint">Turn this on, then click a river. It fetches the data and estimates automatically.</p>
         <div id="estProg" class="estprog"></div>
         <div class="estout" id="estQ">—</div>
